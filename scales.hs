@@ -1,5 +1,7 @@
 import qualified Data.Set as Set
 import qualified Data.List as List
+import qualified Data.Map as Map
+import qualified Data.Maybe as Maybe
 
 type Interval = Int
 type ScaleIntervals = [Interval]
@@ -26,21 +28,28 @@ major_seventh   = 11 :: Interval
 octave          = 12 :: Interval
 
 -- Modes
-major           = [2,2,1,2,2,2,1] :: ScaleIntervals
-dorian          = [2,1,2,2,2,1,2] :: ScaleIntervals
-phrygian        = [1,2,2,2,1,2,2] :: ScaleIntervals
-minor           = [2,1,2,2,1,2,2] :: ScaleIntervals
-blues           = [3,2,1,1,3,2] :: ScaleIntervals
-chromatic       = take 12 $ repeat semitone :: ScaleIntervals
+scales :: Map.Map String ScaleIntervals
+scales = Map.fromList [
+    ("major",       [2,2,1,2,2,2,1]),
+    ("dorian",      [2,1,2,2,2,1,2]),
+    ("phrygian",    [1,2,2,2,1,2,2]),
+    ("minor",       [2,1,2,2,1,2,2]),
+    ("blues",       [3,2,1,1,3,2]),
+    ("chromatic",   take 12 $ repeat semitone),
+    ("whole tone",  take 6 $ repeat wholetone)
+    ]
+scale key mode = Scale key (Maybe.fromJust $ Map.lookup mode scales)
 
--- Chords
-maj             = [unison, major_third, perfect_fifth] :: ChordIntervals
-dom7            = maj ++ [minor_seventh] :: ChordIntervals
-maj7            = maj ++ [major_seventh] :: ChordIntervals
-m               = [unison, minor_third, perfect_fifth] :: ChordIntervals
-m7              = m ++ [minor_seventh] :: ChordIntervals
-m6              = m ++ [minor_sixth] :: ChordIntervals -- ??
-
+chords :: Map.Map String ChordIntervals
+chords = Map.fromList [
+    ("maj",     [unison, major_third, perfect_fifth]),
+    ("dom7",    [unison, major_third, perfect_fifth, minor_seventh]),
+    ("maj7",    [unison, major_third, perfect_fifth, major_seventh]),
+    ("m",       [unison, minor_third, perfect_fifth]), 
+    ("m7",      [unison, minor_third, perfect_fifth, minor_seventh]),
+    ("m6",      [unison, minor_third, perfect_fifth, minor_sixth])
+    ]
+chord key ch = Chord key (Maybe.fromJust $ Map.lookup ch chords)
 
 -- The following functions define cyclic movements on the keys
 semitone_up :: Key -> Key
@@ -90,7 +99,7 @@ prettyKeys k = concat ["|", linetop, "|\n|", linetop, "|\n|", linetop, "|\n|", l
 --        ascii_keyboard = "|00|1|2|3|44|55|6|7|8|9|A|BB|\n"
 
 ppkeys k = putStr $ prettyKeys (keys k)
-main = ppkeys (Scale C major)
+main = ppkeys (scale C "major")
 
 
 --isDiatonicSacle :: Scale -> Bool
