@@ -1,6 +1,6 @@
-import qualified Data.Set as Set
-import qualified Data.List as List
-import qualified Data.Map as Map
+import qualified Data.Set as S
+import qualified Data.List as L
+import qualified Data.Map as M
 import qualified Data.Maybe as Maybe
 
 type Interval = Int
@@ -28,8 +28,8 @@ major_seventh   = 11 :: Interval
 octave          = 12 :: Interval
 
 -- Modes
-scales :: Map.Map String ScaleIntervals
-scales = Map.fromList [
+scales :: M.Map String ScaleIntervals
+scales = M.fromList [
     ("major",       [2,2,1,2,2,2,1]),
     ("dorian",      [2,1,2,2,2,1,2]),
     ("phrygian",    [1,2,2,2,1,2,2]),
@@ -38,10 +38,11 @@ scales = Map.fromList [
     ("chromatic",   take 12 $ repeat semitone),
     ("whole tone",  take 6 $ repeat wholetone)
     ]
-scale key mode = Scale key (Maybe.fromJust $ Map.lookup mode scales)
+scale key mode = Scale key (Maybe.fromJust $ M.lookup mode scales)
 
-chords :: Map.Map String ChordIntervals
-chords = Map.fromList [
+-- Chords
+chords :: M.Map String ChordIntervals
+chords = M.fromList [
     ("maj",     [unison, major_third, perfect_fifth]),
     ("dom7",    [unison, major_third, perfect_fifth, minor_seventh]),
     ("maj7",    [unison, major_third, perfect_fifth, major_seventh]),
@@ -49,7 +50,7 @@ chords = Map.fromList [
     ("m7",      [unison, minor_third, perfect_fifth, minor_seventh]),
     ("m6",      [unison, minor_third, perfect_fifth, minor_sixth])
     ]
-chord key ch = Chord key (Maybe.fromJust $ Map.lookup ch chords)
+chord key ch = Chord key (Maybe.fromJust $ M.lookup ch chords)
 
 -- The following functions define cyclic movements on the keys
 semitone_up :: Key -> Key
@@ -66,11 +67,11 @@ up k i = (iterate semitone_up k) !! i
 down :: Key -> Interval -> Key
 down k i = (iterate semitone_down k) !! i
 
-keys :: Notes -> Set.Set(Key)
-keys (Scale key is) = Set.fromList keylist
+keys :: Notes -> S.Set(Key)
+keys (Scale key is) = S.fromList keylist
     where keylist = foldl (\k i -> (head k `up` i) : k) [key] is
-keys (Chord key is) = Set.fromList $ map (up key) is
-keys (Note key) = Set.fromList [key]
+keys (Chord key is) = S.fromList $ map (up key) is
+keys (Note key) = S.fromList [key]
 
 --cmaj = Scale C major
 --cmin = Scale C minor
@@ -79,19 +80,19 @@ keys (Note key) = Set.fromList [key]
 -- d = foldl (\k i -> (jump i $ head k) : k) [C] [1,wholetone,1,1] 
 --
 
--- Set.difference (keys (Scale C major)) (keys (Scale A minor))
+-- S.difference (keys (Scale C major)) (keys (Scale A minor))
 
 --  |CC|0|D|1|EE|FF|2|G|3|A|4|BB
 --  |CC|0|D|1|EE|FF|2|G|3|A|4|BB
 --  |CCC|DDD|EEE|FFF|GGG|AAA|BBB
 
-prettyKeys :: Set.Set(Key) -> [Char]
+prettyKeys :: S.Set(Key) -> [Char]
 prettyKeys k = concat ["|", linetop, "|\n|", linetop, "|\n|", linetop, "|\n|", lineend, "|\n"]
     where
-        clean arr = concat (List.intersperse "|" $ filter (\x -> length x > 0) arr)
+        clean arr = concat (L.intersperse "|" $ filter (\x -> length x > 0) arr)
         linetop = clean $ bloat [2,1,1,1,2,2,1,1,1,1,1,2] combo
         lineend = clean $ bloat [3,0,3,0,3,3,0,3,0,3,0,3] combo
-        combo = map (\x -> if (Set.member x k) then '#' else ' ') [C .. B]
+        combo = map (\x -> if (S.member x k) then '#' else ' ') [C .. B]
         bloat p l = map (\(num,cha) -> take num $ repeat cha) $ zip p l
 
 -- replace "0" "*" ascii_keyboard
