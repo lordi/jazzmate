@@ -99,10 +99,19 @@ intervals (x:xs) = (interval x (head xs) : (intervals xs))
 -- *Core> (chord C "maj") == (Notes [C, G, E, F])
 -- False
 
+-- | prettyKeys: print out ASCII representation of a keyboard in the 
+-- following form:
+--
 --  |CC|d|D|e|EE|FF|g|G|a|A|b|BB|
 --  |CC|d|D|e|EE|FF|g|G|a|A|b|BB|
 --  |CC|d|D|e|EE|FF|g|G|a|A|b|BB|
 --  |CCC|DDD|EEE|FFF|GGG|AAA|BBB|
+--
+-- The small letter characters stand for the flat version of their capital
+-- counterparts. When the corresponding note is in the input set, it will
+-- be replaced with '#', otherwise ' '.
+--
+-- TODO: too ugly/complicated?
 prettyKeys :: S.Set(Key) -> [Char]
 prettyKeys k = concat ["|", linetop, "|\n|", linetop, "|\n|", linetop, "|\n|", lineend, "|\n"]
     where
@@ -127,7 +136,7 @@ ppkeys k = putStr $ prettyKeys (keys k)
 --guess = filter (sameNotes (Notes [C,E,G])) $ pure chord <*> [C .. B] <*> M.keys chords
 --        where sameNotes x y = (keys x) == (keys y)
 
--- TODO: too complicated?
+-- TODO: too ugly/complicated?
 matchingChords :: [Key] -> [(Key,[String])]
 matchingChords n = filter (not . empty2) $ map (\x -> (x, matches x)) n
             where
