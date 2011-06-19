@@ -1,3 +1,5 @@
+module Core where
+
 import qualified Data.Set as S
 import qualified Data.List as L
 import qualified Data.Map as M
@@ -100,7 +102,7 @@ prettyKeys k = concat ["|", linetop, "|\n|", linetop, "|\n|", linetop, "|\n|", l
 --        ascii_keyboard = "|00|1|2|3|44|55|6|7|8|9|A|BB|\n"
 
 ppkeys k = putStr $ prettyKeys (keys k)
-main = ppkeys (scale C "major")
+-- main = ppkeys (scale C "major")
 
 
 --isDiatonicSacle :: Scale -> Bool

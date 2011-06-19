@@ -13,6 +13,8 @@ import Control.Exception
 import Data.Typeable
 import Data.IORef
 
+import Core
+
 type NoteState = State Int
 
 updateNote :: Int -> NoteState Int
@@ -21,8 +23,7 @@ updateNote pitch = return pitch
 stateioact :: StateT Int IO ()
 stateioact = do
   x <- get
-  liftIO $ putStrLn ("stateioact called, with state as "++
-                     show x)
+  liftIO $ putStrLn ("stateioact called, with state as " ++ show x)
   put (x+1)
 
 main :: IO ()
@@ -30,15 +31,6 @@ main = evalStateT mainAction 42
 
 mainAction :: StateT Int IO ()
 mainAction = embedIO $ \x -> MIDI.main (makeCallback2 stateioact x)
-
-foo :: NFrames -> (NFrames, Msg.T) -> IO (NFrames, Msg.T)
-foo (NFrames cycleStart) (tf@(NFrames t), e) = do
-    putStrLn $ "Time: " ++ show (cycleStart + t) ++ " " ++
-       case e of
-          Msg.Channel b -> "MidiMsg.Channel " ++ show b
-          Msg.System  _ -> "MidiMsg.System ..."
-    putStrLn $ "State: " ++ show ((evalState $ updateNote 3) 99)
-    return (tf, e)
 
 -- the glue which makes it work:
 embedIO :: (IORef s -> IO a) -> StateT s IO a
