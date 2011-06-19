@@ -49,11 +49,19 @@ scale key mode = Scale key (Maybe.fromJust $ M.lookup mode scales)
 chords :: M.Map String ChordIntervals
 chords = M.fromList [
     ("maj",     [unison, major_third, perfect_fifth]),
-    ("dom7",    [unison, major_third, perfect_fifth, minor_seventh]),
+    ("6",       [unison, major_third, perfect_fifth, major_sixth]),
+    ("7",       [unison, major_third, perfect_fifth, minor_seventh]),
     ("maj7",    [unison, major_third, perfect_fifth, major_seventh]),
     ("m",       [unison, minor_third, perfect_fifth]), 
+    ("m6",      [unison, minor_third, perfect_fifth, major_sixth]),
     ("m7",      [unison, minor_third, perfect_fifth, minor_seventh]),
-    ("m6",      [unison, minor_third, perfect_fifth, minor_sixth])
+    ("m9",      [unison, minor_third, minor_seventh, 14]),
+    ("m9'",     [unison, minor_third, perfect_fifth, minor_seventh, 14]),
+    ("dim",     [unison, minor_third, tritone]),
+    ("add9",    [unison, major_third, perfect_fifth, 14]),
+    ("aug",     [unison, major_third, minor_sixth]),
+    ("sus2",    [unison, wholetone, perfect_fifth]),
+    ("sus4",    [unison, perfect_fourth, perfect_fifth])
     ]
 chord key ch = Chord key (Maybe.fromJust $ M.lookup ch chords)
 
