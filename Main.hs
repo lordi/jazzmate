@@ -30,7 +30,7 @@ stateioact2 e = do
             Msg.Channel Ch.Cons {Ch.messageBody = (Ch.Voice (V.NoteOn pitch _))} -> ((fromPitch pitch):x)
             Msg.Channel Ch.Cons {Ch.messageBody = (Ch.Voice (V.NoteOff pitch _))} -> L.delete (fromPitch pitch) x
             _ -> x 
-    liftIO $ putStrLn ("\n" ++ show y ++ "\n" ++ show (matchingChords y))
+    liftIO $ putStrLn ("\n" ++ show y ++ "\n" ++ show (intervals y) ++ "\n" ++ show (matchingChords y))
     liftIO $ ppkeys (Notes y)
     put y
 

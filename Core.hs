@@ -86,6 +86,13 @@ keys (Scale key is) = S.fromList keylist
 keys (Chord key is) = S.fromList $ map (up key) is
 keys (Notes k) = S.fromList k
 
+interval :: Key -> Key -> Interval
+interval a b = ((fromEnum a) - (fromEnum b)) `mod` octave
+
+intervals :: [Key] -> ScaleIntervals
+intervals [] = []
+intervals (x:[]) = []
+intervals (x:xs) = (interval x (head xs) : (intervals xs))
 
 -- *Core> (chord C "maj") == (Notes [C, G, E])
 -- True
