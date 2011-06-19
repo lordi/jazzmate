@@ -18,36 +18,21 @@ import qualified Data.List as L
 
 import Core
 
-type NoteCollectionT = StateT [Int] IO ()
+type NoteCollectionT = StateT [Key] IO ()
 
-type NoteState = State Int
-
-updateNote :: Int -> NoteState Int
-updateNote pitch = return pitch
-
-stateioact :: StateT Int IO ()
-stateioact = do
-  x <- get
-  liftIO $ putStrLn ("stateioact called, with state as " ++ show x)
-  put (x+1)
-
+fromPitch :: V.Pitch -> Key
+fromPitch p = toEnum ((V.fromPitch p) `mod` octave)
 
 stateioact2 :: Msg.T -> NoteCollectionT
 stateioact2 e = do
     x <- get
---  liftIO $ putStrLn $ case e of
---      Msg.Channel Ch.Cons {Ch.messageBody = (Ch.Voice (V.NoteOn pitch _))} -> "NOTE ON " ++ show pitch
---      Msg.Channel Ch.Cons {Ch.messageBody = (Ch.Voice (V.NoteOff pitch _))} -> "NOTE OFF " ++ show pitch
---        Msg.Channel b -> "MidiMsg.Channel " ++ show b
---      _ -> "MidiMsg.System ..."
     let y = case e of
-            Msg.Channel Ch.Cons {Ch.messageBody = (Ch.Voice (V.NoteOn pitch _))} -> ((V.fromPitch pitch):x)
-            Msg.Channel Ch.Cons {Ch.messageBody = (Ch.Voice (V.NoteOff pitch _))} -> L.delete (V.fromPitch pitch) x
+            Msg.Channel Ch.Cons {Ch.messageBody = (Ch.Voice (V.NoteOn pitch _))} -> ((fromPitch pitch):x)
+            Msg.Channel Ch.Cons {Ch.messageBody = (Ch.Voice (V.NoteOff pitch _))} -> L.delete (fromPitch pitch) x
             _ -> x 
-    liftIO $ putStrLn ("stateioact called, with state as " ++ show y)
+    liftIO $ putStrLn ("\n" ++ show y ++ "\n" ++ show (matchingChords y))
+    liftIO $ ppkeys (Notes y)
     put y
-
-
 
 main :: IO ()
 main = evalStateT mainAction []
@@ -64,18 +49,10 @@ embedIO a = do s <- get
                put s'
                return r
 
-makeCallback2 :: (Msg.T -> NoteCollectionT) -> IORef [Int] -> NFrames -> (NFrames, Msg.T) -> IO (NFrames, Msg.T)
+makeCallback2 :: (Msg.T -> NoteCollectionT) -> IORef [Key] -> NFrames -> (NFrames, Msg.T) -> IO (NFrames, Msg.T)
 makeCallback2 act x (NFrames cycleStart) (tf@(NFrames t), e) = do 
                         s <- readIORef x
                         (_,sy) <- runStateT (act e) s
                         writeIORef x sy
                         return (tf, e)
-
-
-makeCallback :: StateT s IO a -> IORef s -> IO a
-makeCallback act x = do s <- readIORef x
-                        (res,s') <- runStateT act s
-                        writeIORef x s'
-                        return res
-
 

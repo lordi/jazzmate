@@ -12,7 +12,10 @@ type ChordIntervals = [Interval]
 data Key = C | Db | D | Eb | E | F | Gb | G | Ab | A | Bb | B 
     deriving (Show, Eq, Ord, Enum) -- Show,Read,Eq
 
-data Notes = Scale Key ScaleIntervals | Chord Key ChordIntervals | Note Key
+data Notes = Scale Key ScaleIntervals | Chord Key ChordIntervals | Notes [Key]
+
+instance Eq Notes where
+    x == y = (keys x) == (keys y)
 
 -- Intervals
 unison          = 0 :: Interval
@@ -73,21 +76,18 @@ keys :: Notes -> S.Set(Key)
 keys (Scale key is) = S.fromList keylist
     where keylist = foldl (\k i -> (head k `up` i) : k) [key] is
 keys (Chord key is) = S.fromList $ map (up key) is
-keys (Note key) = S.fromList [key]
+keys (Notes k) = S.fromList k
 
---cmaj = Scale C major
---cmin = Scale C minor
 
--- c = foldl addelem [C] [1,1,1,1] where addelem k i = (jump i $ head k) : k
--- d = foldl (\k i -> (jump i $ head k) : k) [C] [1,wholetone,1,1] 
---
+-- *Core> (chord C "maj") == (Notes [C, G, E])
+-- True
+-- *Core> (chord C "maj") == (Notes [C, G, E, F])
+-- False
 
--- S.difference (keys (Scale C major)) (keys (Scale A minor))
-
---  |CC|0|D|1|EE|FF|2|G|3|A|4|BB
---  |CC|0|D|1|EE|FF|2|G|3|A|4|BB
---  |CCC|DDD|EEE|FFF|GGG|AAA|BBB
-
+--  |CC|d|D|e|EE|FF|g|G|a|A|b|BB|
+--  |CC|d|D|e|EE|FF|g|G|a|A|b|BB|
+--  |CC|d|D|e|EE|FF|g|G|a|A|b|BB|
+--  |CCC|DDD|EEE|FFF|GGG|AAA|BBB|
 prettyKeys :: S.Set(Key) -> [Char]
 prettyKeys k = concat ["|", linetop, "|\n|", linetop, "|\n|", linetop, "|\n|", lineend, "|\n"]
     where
@@ -103,32 +103,19 @@ prettyKeys k = concat ["|", linetop, "|\n|", linetop, "|\n|", linetop, "|\n|", l
 
 ppkeys k = putStr $ prettyKeys (keys k)
 -- main = ppkeys (scale C "major")
-
-
---isDiatonicSacle :: Scale -> Bool
-
-
-
---intervals :: Scale -> ScaleIntervals
---intervals = 
-
-
+--
 -- In music, a whole tone scale is a scale in which each note is separated from its neighbors by the interval of a whole step
 -- isWholeToneScale :: ScaleIntervals -> Bool
 -- isWholeToneScale s = all (== wholetone) s
 
+--import Control.Applicative
+--guess = filter (sameNotes (Notes [C,E,G])) $ pure chord <*> [C .. B] <*> M.keys chords
+--        where sameNotes x y = (keys x) == (keys y)
 
+-- TODO: too complicated?
+matchingChords :: [Key] -> [(Key,[String])]
+matchingChords n = filter (not . empty2) $ map (\x -> (x, matches x)) n
+            where
+                matches x = M.keys $ M.filter (== (Notes n)) $ M.map (Chord x) chords
+                empty2 k = null $ snd k
 
---------
-
--- type Interval' = Key -> Key
---instance Eq Interval' where
---    x == y = x C == y C
-
--- unison' = id :: Interval'
---st = succ :: Interval'
---wt = st . st :: Interval'
-
---major' = [st,st,wt,wt
---scale :: Key -> ScaleIntervals -> Scale
---scale k si = ...
