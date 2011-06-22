@@ -3,34 +3,33 @@ module Core where
 import qualified Data.Set as S
 import qualified Data.List as L
 import qualified Data.Map as M
-import qualified Data.Maybe as Maybe
+import Data.Maybe
 
 type Interval = Int
 type ScaleIntervals = [Interval]
 type ChordIntervals = [Interval]
 
 data Key = C | Db | D | Eb | E | F | Gb | G | Ab | A | Bb | B 
-    deriving (Show, Eq, Ord, Enum) -- Show,Read,Eq
-
-data Notes = Scale Key ScaleIntervals | Chord Key ChordIntervals | Notes [Key]
-
-instance Eq Notes where
-    x == y = (keys x) == (keys y)
+    deriving (Show, Eq, Ord, Enum)
 
 -- Intervals
 unison          = 0 :: Interval
 semitone        = 1 :: Interval
+minor_second    = 1 :: Interval
 wholetone       = 2 :: Interval
+major_second    = 2 :: Interval
 minor_third     = 3 :: Interval
 major_third     = 4 :: Interval
 perfect_fourth  = 5 :: Interval
 tritone         = 6 :: Interval
+raised_fourth   = 6 :: Interval
 perfect_fifth   = 7 :: Interval
 minor_sixth     = 8 :: Interval
 major_sixth     = 9 :: Interval
 minor_seventh   = 10 :: Interval
 major_seventh   = 11 :: Interval
 octave          = 12 :: Interval
+nineth          = 13 :: Interval
 
 -- Modes
 scales :: M.Map String ScaleIntervals
@@ -43,7 +42,6 @@ scales = M.fromList [
     ("chromatic",   take 12 $ repeat semitone),
     ("whole tone",  take 6 $ repeat wholetone)
     ]
-scale key mode = Scale key (Maybe.fromJust $ M.lookup mode scales)
 
 -- Chords
 chords :: M.Map String ChordIntervals
@@ -58,12 +56,22 @@ chords = M.fromList [
     ("m9",      [unison, minor_third, minor_seventh, 14]),
     ("m9'",     [unison, minor_third, perfect_fifth, minor_seventh, 14]),
     ("dim",     [unison, minor_third, tritone]),
+    ("dim7",    [unison, minor_third, tritone, major_sixth]),
     ("add9",    [unison, major_third, perfect_fifth, 14]),
     ("aug",     [unison, major_third, minor_sixth]),
     ("sus2",    [unison, wholetone, perfect_fifth]),
     ("sus4",    [unison, perfect_fourth, perfect_fifth])
     ]
-chord key ch = Chord key (Maybe.fromJust $ M.lookup ch chords)
+
+
+
+data Notes = Scale Key ScaleIntervals | Chord Key ChordIntervals | Notes [Key]
+
+instance Eq Notes where
+    x == y = (keys x) == (keys y)
+
+scale key mode = Scale key (fromJust $ M.lookup mode scales)
+chord key ch = Chord key (fromJust $ M.lookup ch chords)
 
 -- The following functions define cyclic movements on the keys
 semitone_up :: Key -> Key
