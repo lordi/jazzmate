@@ -35,19 +35,19 @@ transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOff p _))})
 transform _ = id
 
 transformC :: Msg.T -> KeyCollectionT
-transformC e = get >>= \x -> put (transform e x)
+transformC e = do x <- get
+                  put (transform e x)
+                  y <- get
+                  liftIO $ putStrLn $ show y
+                  liftIO $ putStrLn $ show (intervals y)
+                  liftIO $ putStrLn $ show (matchingChords y)
+                  liftIO $ ppkeys $ Notes y
 
 main :: IO ()
 main = evalStateT mainAction []
 
 mainAction :: KeyCollectionT
-mainAction = embedIO $ \x -> MIDI.main (makeCallback (transformC >> printC) x)
-    where printC e = do
-                     y <- get
-                     liftIO $ putStrLn $ show y
-                     liftIO $ putStrLn $ show (intervals y)
-                     liftIO $ putStrLn $ show (matchingChords y)
-                     liftIO $ ppkeys $ Notes y
+mainAction = embedIO $ \x -> MIDI.main (makeCallback (transformC) x)
 
 -- from http://www.haskell.org/pipermail/haskell-cafe/2007-July/028501.html
 -- the glue which makes it work:
