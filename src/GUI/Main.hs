@@ -1,4 +1,4 @@
-module Main where
+module GUI.Main where
 
 import qualified Data.List as L
 
@@ -9,15 +9,14 @@ import Control.Monad.Error
 import Control.Exception
 import Data.Typeable
 import Data.IORef
+import Data.Maybe
 
 import Graphics.UI.Gtk hiding(get)
 import qualified Graphics.Rendering.Cairo as C
 import Control.Concurrent
 
 import Core
-import qualified MIDIBridge
 
-import Data.Maybe
 
 foreach :: (Monad m) => [a] -> (a -> m b) -> m [b]
 foreach = flip mapM
@@ -85,7 +84,7 @@ updateState ch stvar = do
 
 -- | Main function. Create a GTK window with a drawing window, fire up the
 -- MIDI bridge and register the expose rendering handler.
-main = do
+main midi = do
     stvar <- newMVar []
     initGUI
     window <- windowNew
@@ -97,7 +96,7 @@ main = do
                               drawing <- widgetGetDrawWindow canvas
                               renderWithDrawable drawing $ renderCanvas st size
                               return True)
-    ch <- MIDIBridge.run
+    ch <- midi
     forkIO $ forever (updateState ch stvar >> (invalidate canvas))
     widgetShowAll window
     mainGUI

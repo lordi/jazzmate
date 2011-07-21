@@ -1,4 +1,4 @@
-module MIDIBridge where
+module MIDI.JackBridge where
 
 import qualified Data.List as L
 

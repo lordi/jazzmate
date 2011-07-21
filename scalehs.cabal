@@ -10,5 +10,6 @@ Cabal-Version:       >=1.2
 
 Executable scalehs
   Main-is:           Main.hs
+  Hs-Source-Dirs:    src
   Build-Depends:     base >= 3 && < 5, containers, mtl, midi, jack >= 0.6, gtk, cairo
 
