@@ -64,8 +64,10 @@ renderKeyboard keys (w, h) = do
 
 renderCanvas st (w, h) = do
     C.setSourceRGBA 0 0 0 1.0
-    C.moveTo 10 250
-    C.showText $ "Current keys: " ++ (show st) ++ "; Canvas size: " ++ (show (w, h))
+    C.moveTo 10 250; C.showText $ "Currently pressed keys: "
+    C.moveTo 150 250; C.showText $ show st
+    C.moveTo 10 270; C.showText $ "Matching chords: "
+    C.moveTo 150 270; C.showText $ show (matchingChords st)
     renderKeyboard st (300, 200)
 
 invalidate :: DrawingArea -> IO ()
