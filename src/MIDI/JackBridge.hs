@@ -1,10 +1,7 @@
 module MIDI.JackBridge where
 
-import qualified Data.List as L
-
 import Control.Concurrent
 import Control.Concurrent.Chan
-
 import qualified Sound.JACK.MIDI as MIDI
 import qualified Sound.MIDI.Message as Msg
 import Sound.JACK (NFrames(NFrames), )

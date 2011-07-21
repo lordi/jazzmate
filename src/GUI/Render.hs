@@ -1,20 +1,6 @@
 module GUI.Render where
 
-import qualified Data.List as L
-
-import Control.Monad.State
-import Control.Monad.Reader
-import Control.Monad.Writer
-import Control.Monad.Error
-import Control.Exception
-import Data.Typeable
-import Data.IORef
-import Data.Maybe
-
-import Graphics.UI.Gtk hiding(get)
 import qualified Graphics.Rendering.Cairo as C
-import Control.Concurrent
-
 import Core
 
 foreach :: (Monad m) => [a] -> (a -> m b) -> m [b]

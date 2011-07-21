@@ -5,12 +5,9 @@ import qualified Data.List as L
 import qualified Data.Map as M
 import Data.Maybe
 
-
 import qualified Sound.MIDI.Message as Msg
 import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
 import qualified Sound.MIDI.Message.Channel.Voice as V
-
-
 
 type Interval = Int
 type ScaleIntervals = [Interval]
