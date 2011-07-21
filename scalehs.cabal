@@ -1,5 +1,5 @@
 Name:                scalehs
-Version:             0.1
+Version:             0.2.0
 Description:         Scale and Chord Utility for Piano Players
 License:             GPL
 License-file:        LICENSE
@@ -10,5 +10,5 @@ Cabal-Version:       >=1.2
 
 Executable scalehs
   Main-is:           Main.hs
-  Build-Depends:     base >= 3 && < 5, containers, mtl, midi, jack >= 0.6
+  Build-Depends:     base >= 3 && < 5, containers, mtl, midi, jack >= 0.6, gtk, cairo
 

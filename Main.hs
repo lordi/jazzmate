@@ -2,12 +2,6 @@ module Main where
 
 import qualified Data.List as L
 
-import qualified Sound.JACK.MIDI as MIDI
-import Sound.JACK (NFrames(NFrames), )
-import qualified Sound.MIDI.Message as Msg
-import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
-import qualified Sound.MIDI.Message.Channel.Voice as V
-
 import Control.Monad.State
 import Control.Monad.Reader
 import Control.Monad.Writer
@@ -16,54 +10,52 @@ import Control.Exception
 import Data.Typeable
 import Data.IORef
 
+import Graphics.UI.Gtk hiding(get)
+import Graphics.Rendering.Cairo hiding(scale,transform)
+import Control.Concurrent
+
 import Core
+import qualified MIDIBridge
 
-type KeyCollectionT = StateT [Key] IO ()
+import Data.Maybe
 
--- | Converts a MIDI pitch to an element from the Key enum defined in Core
-fromPitch :: V.Pitch -> Key
-fromPitch p = toEnum ((V.fromPitch p) `mod` octave)
+renderCanvas st (w, h) = do
+    setSourceRGBA 0 0 0 0.5
+    setLineWidth 2.5
+    stroke
+    moveTo 10 10
+    lineTo 20 20
+    showText $ "Current keys: " ++ (show st) ++ "; Canvas size: " ++ (show (w, h))
 
--- | The core of this module's functionality: Take a MIDI message and a list
--- of keys, and return the resulting list. Pressing a key will add the
--- corresponding note to the list, lifting it will delete it.
-transform :: Msg.T -> [Key] -> [Key]
-transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOn p _))})
-            = (:) $ fromPitch p
-transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOff p _))})
-            = L.delete $ fromPitch p
-transform _ = id
+invalidate :: DrawingArea -> IO ()
+invalidate win = do
+    dwin <- widgetGetDrawWindow win
+    drawWindowInvalidateRect dwin rect False
+    return ()
+    where rect = (Rectangle 0 0 1000 1000) -- FIXME
 
-transformC :: Msg.T -> KeyCollectionT
-transformC e = do x <- get
-                  put (transform e x)
-                  y <- get
-                  liftIO $ putStrLn $ show y
-                  liftIO $ putStrLn $ show (intervals y)
-                  liftIO $ putStrLn $ show (matchingChords y)
-                  liftIO $ ppkeys $ Notes y
+-- | For every message that is read from the Chan, the state that is stored
+-- in the MVar stvar is updated.
+updateState ch stvar = do
+    msg <- readChan ch
+    modifyMVar_ stvar $ return . (transform msg)
 
-main :: IO ()
-main = evalStateT mainAction []
-
-mainAction :: KeyCollectionT
-mainAction = embedIO $ \x -> MIDI.main (makeCallback (transformC) x)
-
--- from http://www.haskell.org/pipermail/haskell-cafe/2007-July/028501.html
--- the glue which makes it work:
-embedIO :: (IORef s -> IO a) -> StateT s IO a
-embedIO a = do s <- get
-               x <-  liftIO $ newIORef s
-               r <-  liftIO $ a x
-               s' <- liftIO $ readIORef x
-               put s'
-               return r
-
-makeCallback :: (Msg.T -> KeyCollectionT) -> IORef [Key] ->
-                NFrames -> (NFrames, Msg.T) -> IO (NFrames, Msg.T)
-makeCallback act x _ (tf@(NFrames t), e) = do
-                        s <- readIORef x
-                        (_,sy) <- runStateT (act e) s
-                        writeIORef x sy
-                        return (tf, e)
+-- | Main function. Create a GTK window with a drawing window, fire up the
+-- MIDI bridge and register the expose rendering handler.
+main = do
+    stvar <- newMVar []
+    initGUI
+    window <- windowNew
+    canvas <- drawingAreaNew
+    set window [ containerChild := canvas ]
+    onDestroy window mainQuit
+    onExpose canvas (\e -> do st <- readMVar stvar
+                              size <- widgetGetSize canvas
+                              drawing <- widgetGetDrawWindow canvas
+                              renderWithDrawable drawing $ renderCanvas st size
+                              return True)
+    ch <- MIDIBridge.run
+    forkIO $ forever (updateState ch stvar >> (invalidate canvas))
+    widgetShowAll window
+    mainGUI
 

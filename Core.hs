@@ -5,11 +5,18 @@ import qualified Data.List as L
 import qualified Data.Map as M
 import Data.Maybe
 
+
+import qualified Sound.MIDI.Message as Msg
+import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
+import qualified Sound.MIDI.Message.Channel.Voice as V
+
+
+
 type Interval = Int
 type ScaleIntervals = [Interval]
 type ChordIntervals = [Interval]
 
-data Key = C | Db | D | Eb | E | F | Gb | G | Ab | A | Bb | B 
+data Key = C | Db | D | Eb | E | F | Gb | G | Ab | A | Bb | B
     deriving (Show, Eq, Ord, Enum)
 
 -- Intervals
@@ -153,3 +160,21 @@ matchingChords n = filter (not . empty2) $ map (\x -> (x, matches x)) n
 
 circle_of_fifths :: [Key]
 circle_of_fifths = take 12 $ iterate (flip up $ perfect_fifth) C
+
+type MyState = [Key]
+
+-- | Converts a MIDI pitch to an element from the Key enum defined in Core
+fromPitch :: V.Pitch -> Key
+fromPitch p = toEnum ((V.fromPitch p) `mod` octave)
+
+-- | The core of this module's functionality: Take a MIDI message and a list
+-- of keys, and return the resulting list. Pressing a key will add the
+-- corresponding note to the list, lifting it will delete it.
+transform :: Msg.T -> [Key] -> [Key]
+transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOn p _))})
+            = (:) $ fromPitch p
+transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOff p _))})
+            = L.delete $ fromPitch p
+transform _ = id
+
+
