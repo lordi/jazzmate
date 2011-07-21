@@ -1,6 +1,6 @@
 module Main where
 
-import qualified GUI.Main as G
-import qualified MIDI.JackBridge as Bridge
+import qualified GUI.Main as GUI
+import qualified MIDI.JackBridge as Jack
 
-main = G.main Bridge.run
+main = GUI.main Jack.run
