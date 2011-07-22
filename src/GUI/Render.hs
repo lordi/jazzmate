@@ -1,10 +1,37 @@
 module GUI.Render where
 
 import qualified Graphics.Rendering.Cairo as C
+import qualified Data.Maybe as M
+import qualified Data.List as L
 import Core
 
 foreach :: (Monad m) => [a] -> (a -> m b) -> m [b]
 foreach = flip mapM
+
+keyToAngle :: Key -> Double
+keyToAngle key = fromIntegral (M.fromJust $ L.elemIndex key circleOfFifths) * 30.0
+
+renderArc :: Double -> Double -> Key -> C.Render ()
+renderArc cx cy key = do
+    let radians = (keyToAngle key) * pi / 180.0 :: Double
+        point dist gamma = (x, y)
+            where x = cx + (sin (radians + gamma)) * dist
+                  y = cy - (cos (radians + gamma)) * dist
+
+    uncurry C.moveTo $ point 30 (-0.2)
+    uncurry C.lineTo $ point (cx - 30) (-0.2)
+    uncurry C.lineTo $ point (cx - 30) 0.2
+    uncurry C.lineTo $ point 30 0.2
+    uncurry C.lineTo $ point 30 (-0.2)
+    C.stroke
+    uncurry C.moveTo $ point (cx - 20) 0
+    C.showText $ show key
+
+renderCircleOfFifths keys (w, h) = do
+    let cx = realToFrac w / 2
+        cy = realToFrac h / 2
+    foreach circleOfFifths $ renderArc cx cy
+
 
 -- | First try to write a function that renders a piano on the screen. Still
 -- very ugly duckling, needs rewrite.
@@ -53,5 +80,7 @@ renderCanvas st (w, h) = do
     C.moveTo 10 270; C.showText $ "Matching chords: "
     C.moveTo 150 270; C.showText $ show (matchingChords st)
     renderKeyboard st (300, 200)
+    C.translate 300 0
+    renderCircleOfFifths st (300, 300)
 
 

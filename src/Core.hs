@@ -155,8 +155,8 @@ matchingChords n = filter (not . empty2) $ map (\x -> (x, matches x)) n
                 matches x = M.keys $ M.filter (== (Notes n)) $ M.map (Chord x) chords
                 empty2 k = null $ snd k
 
-circle_of_fifths :: [Key]
-circle_of_fifths = take 12 $ iterate (flip up $ perfect_fifth) C
+circleOfFifths :: [Key]
+circleOfFifths = take 12 $ iterate (flip up $ perfect_fifth) C
 
 type MyState = [Key]
 
