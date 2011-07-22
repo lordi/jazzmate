@@ -164,6 +164,9 @@ type MyState = [Key]
 fromPitch :: V.Pitch -> Key
 fromPitch p = toEnum ((V.fromPitch p) `mod` octave)
 
+toPitch :: Key -> V.Pitch
+toPitch k = V.toPitch (fromEnum k)
+
 -- | The core of this module's functionality: Take a MIDI message and a list
 -- of keys, and return the resulting list. Pressing a key will add the
 -- corresponding note to the list, lifting it will delete it.
