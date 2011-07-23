@@ -7,24 +7,10 @@ the piano~~ a rocking Cairo rendering of a keyboard layout, highlighting the
 keys in question. I wrote this program to learn both Haskell and musical chord
 names.
 
-Example output (out of date / now uses Cairo)
+Example output (work in progress)
 ---------------------------------
 
-    [G,E,C]
-    [3,4]
-    [(C,["maj"])]
-    |##| | | |##|  | |#| | | |  |
-    |##| | | |##|  | |#| | | |  |
-    |##| | | |##|  | |#| | | |  |
-    |###|   |###|   |###|   |   |
-    
-    [C,A,Gb,D]
-    [3,3,4]
-    [(D,["7"])]
-    |##| |#| |  |  |#| | |#| |  |
-    |##| |#| |  |  |#| | |#| |  |
-    |##| |#| |  |  |#| | |#| |  |
-    |###|###|   |   |   |###|   |
+![Screenshot of the development version](screenshot.jpg "Screenshot")
 
 Code structure
 --------------
@@ -46,4 +32,4 @@ Requirements
  * Bindings to the JACK Audio Connection Kit for Haskell (Jack 0.6). As of
    June 2011, you have to use the darcs version at
    http://code.haskell.org/jack/, since Hackage only provides 0.5.
-
+ * Further Haskell dependencies: midi, gtk, cairo
