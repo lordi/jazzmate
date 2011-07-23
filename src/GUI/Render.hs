@@ -11,18 +11,22 @@ foreach = flip mapM
 keyToAngle :: Key -> Double
 keyToAngle key = fromIntegral (M.fromJust $ L.elemIndex key circleOfFifths) * 30.0
 
-renderArc :: Double -> Double -> Bool -> Key -> C.Render ()
+renderArc :: Double     -- Center x coordinate
+            -> Double   -- Center y coordinate
+            -> Bool     -- True, if the arc should be highlighted
+            -> Key      -- Key in the Circle of Fifths
+            -> C.Render ()
 renderArc cx cy highlight key = do
     let radians = (keyToAngle key) * pi / 180.0 :: Double
         point dist gamma = (x, y)
             where x = cx + (sin (radians + gamma)) * dist
                   y = cy - (cos (radians + gamma)) * dist
 
-    uncurry C.moveTo $ point 30 (-0.2)
-    uncurry C.lineTo $ point (cx - 10) (-0.2)
-    uncurry C.lineTo $ point (cx - 10) 0.2
-    uncurry C.lineTo $ point 30 0.2
-    uncurry C.lineTo $ point 30 (-0.2)
+    uncurry C.moveTo $ point 30 (-0.25)
+    uncurry C.lineTo $ point (cx - 10) (-0.25)
+    uncurry C.lineTo $ point (cx - 10) 0.25
+    uncurry C.lineTo $ point 30 0.25
+    uncurry C.lineTo $ point 30 (-0.25)
     C.closePath
     C.setSourceRGBA 1.0 1.0 (if highlight then 1.0 else 0.0) 1.0
     C.fillPreserve
@@ -30,16 +34,28 @@ renderArc cx cy highlight key = do
     C.stroke
     uncurry C.moveTo $ point (cx - 30) 0
     C.showText $ show key
+    uncurry C.moveTo $ point (cx - 60) 0
+    C.showText $ (show (down key minor_third)) ++ "m"
 
 
+-- | For a list of keys, extract the chords and return all corresponding
+-- keys in the Circle of Fifths. The keys of all major chords are added
+-- and the keys of all minor chords are transposed by a minor third. You
+-- can verify this by looking at a Circle of Fifths representation.
+inCircle :: [Key] -> [Key]
+inCircle keys = maj ++ min
+            where onlyMaj (_, mode) = "maj" `elem` mode || "maj7" `elem` mode
+                  onlyMin (_, mode) = "m" `elem` mode || "m7" `elem` mode
+                  maj = map fst (filter onlyMaj chords) 
+                  min = map ((flip up $ minor_third) . fst) (filter onlyMin chords)
+                  chords = matchingChords keys
+
+-- | Render Circle of Fifths
 renderCircleOfFifths keys (w, h) = do
     let cx = realToFrac w / 2
         cy = realToFrac h / 2
-        onlyMaj (_, mode) = "maj" `elem` mode || "maj7" `elem` mode
-        highlight key = key `elem` (map fst (filter onlyMaj (matchingChords keys)))
+        highlight = flip elem (inCircle keys)
     foreach circleOfFifths $ \ key -> renderArc cx cy (highlight key) key
-    --renderArc cx cy True C
-
 
 -- | First try to write a function that renders a piano on the screen. Still
 -- very ugly duckling, needs rewrite.
