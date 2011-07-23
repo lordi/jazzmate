@@ -11,26 +11,34 @@ foreach = flip mapM
 keyToAngle :: Key -> Double
 keyToAngle key = fromIntegral (M.fromJust $ L.elemIndex key circleOfFifths) * 30.0
 
-renderArc :: Double -> Double -> Key -> C.Render ()
-renderArc cx cy key = do
+renderArc :: Double -> Double -> Bool -> Key -> C.Render ()
+renderArc cx cy highlight key = do
     let radians = (keyToAngle key) * pi / 180.0 :: Double
         point dist gamma = (x, y)
             where x = cx + (sin (radians + gamma)) * dist
                   y = cy - (cos (radians + gamma)) * dist
 
     uncurry C.moveTo $ point 30 (-0.2)
-    uncurry C.lineTo $ point (cx - 30) (-0.2)
-    uncurry C.lineTo $ point (cx - 30) 0.2
+    uncurry C.lineTo $ point (cx - 10) (-0.2)
+    uncurry C.lineTo $ point (cx - 10) 0.2
     uncurry C.lineTo $ point 30 0.2
     uncurry C.lineTo $ point 30 (-0.2)
+    C.closePath
+    C.setSourceRGBA 1.0 1.0 (if highlight then 1.0 else 0.0) 1.0
+    C.fillPreserve
+    C.setSourceRGBA 0.0 0.0 0.0 1.0
     C.stroke
-    uncurry C.moveTo $ point (cx - 20) 0
+    uncurry C.moveTo $ point (cx - 30) 0
     C.showText $ show key
+
 
 renderCircleOfFifths keys (w, h) = do
     let cx = realToFrac w / 2
         cy = realToFrac h / 2
-    foreach circleOfFifths $ renderArc cx cy
+        onlyMaj (_, mode) = "maj" `elem` mode || "maj7" `elem` mode
+        highlight key = key `elem` (map fst (filter onlyMaj (matchingChords keys)))
+    foreach circleOfFifths $ \ key -> renderArc cx cy (highlight key) key
+    --renderArc cx cy True C
 
 
 -- | First try to write a function that renders a piano on the screen. Still
