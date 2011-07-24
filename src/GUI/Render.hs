@@ -3,6 +3,10 @@ module GUI.Render where
 import qualified Graphics.Rendering.Cairo as C
 import qualified Data.Maybe as M
 import qualified Data.List as L
+
+import Data.Colour.RGBSpace
+import Data.Colour.RGBSpace.HSV
+
 import Core
 
 foreach :: (Monad m) => [a] -> (a -> m b) -> m [b]
@@ -20,8 +24,8 @@ renderArc :: Double     -- Center x coordinate
 renderArc cx cy key hlmaj hlmin = do
     let radians = (keyToAngle key) * pi / 180.0 :: Double
         g = 15 * pi / 180.0 :: Double
---        (majr, majg, majb) = (angleToColor $ keyToAngle key)
---        (minr, ming, minb) = (angleToColor $ keyToAngle key)
+        RGB majr majg majb = hsv (keyToAngle key) (if hlmaj then 1.0 else 0.25) 0.96
+        RGB minr ming minb = hsv (keyToAngle key) (if hlmin then 1.0 else 0.25) 0.8
         point dist gamma = (x, y)
             where x = cx + (sin (radians + gamma)) * dist
                   y = cy - (cos (radians + gamma)) * dist
@@ -34,7 +38,7 @@ renderArc cx cy key hlmaj hlmin = do
     uncurry C.lineTo $ point (cx - 50) 0
     uncurry C.lineTo $ point (cx - 50) (-g)
     C.closePath
-    C.setSourceRGBA 1.0 1.0 (if hlmaj then 1.0 else 0.0) 1.0
+    C.setSourceRGBA majr majg majb 1.0
     C.fillPreserve
     C.setSourceRGBA 0.0 0.0 0.0 1.0
     C.stroke
@@ -46,7 +50,7 @@ renderArc cx cy key hlmaj hlmin = do
     uncurry C.lineTo $ point (cx - 95) 0
     uncurry C.lineTo $ point (cx - 95) (-g)
     C.closePath
-    C.setSourceRGBA 1.0 1.0 (if hlmin then 1.0 else 0.0) 1.0
+    C.setSourceRGBA minr ming minb 1.0
     C.fillPreserve
     C.setSourceRGBA 0.0 0.0 0.0 1.0
     C.stroke
@@ -76,6 +80,9 @@ renderCircleOfFifths keys (w, h) = do
         cy = realToFrac h / 2
         hlmaj = flip elem (majorChordKeys keys)
         hlmin = flip elem (minorChordKeys keys)
+    C.setLineCap C.LineCapRound
+    C.setLineJoin C.LineJoinRound
+    C.setLineWidth 2
     foreach circleOfFifths $ \ key -> renderArc cx cy key (hlmaj key) (hlmin (down key minor_third))
 
 -- | First try to write a function that renders a piano on the screen. Still
