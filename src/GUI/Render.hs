@@ -13,28 +13,46 @@ keyToAngle key = fromIntegral (M.fromJust $ L.elemIndex key circleOfFifths) * 30
 
 renderArc :: Double     -- Center x coordinate
             -> Double   -- Center y coordinate
-            -> Bool     -- True, if the arc should be highlighted
             -> Key      -- Key in the Circle of Fifths
+            -> Bool     -- If True, highlight the major part of the arc
+            -> Bool     -- If True, highlight the minor part of the arc
             -> C.Render ()
-renderArc cx cy highlight key = do
+renderArc cx cy key hlmaj hlmin = do
     let radians = (keyToAngle key) * pi / 180.0 :: Double
+        g = 15 * pi / 180.0 :: Double
+--        (majr, majg, majb) = (angleToColor $ keyToAngle key)
+--        (minr, ming, minb) = (angleToColor $ keyToAngle key)
         point dist gamma = (x, y)
             where x = cx + (sin (radians + gamma)) * dist
                   y = cy - (cos (radians + gamma)) * dist
 
-    uncurry C.moveTo $ point 30 (-0.25)
-    uncurry C.lineTo $ point (cx - 10) (-0.25)
-    uncurry C.lineTo $ point (cx - 10) 0.25
-    uncurry C.lineTo $ point 30 0.25
-    uncurry C.lineTo $ point 30 (-0.25)
+    uncurry C.moveTo $ point (cx - 50) (-g)
+    uncurry C.lineTo $ point (cx - 10) (-g)
+    uncurry C.lineTo $ point (cx - 10) 0
+    uncurry C.lineTo $ point (cx - 10) g
+    uncurry C.lineTo $ point (cx - 50) g
+    uncurry C.lineTo $ point (cx - 50) 0
+    uncurry C.lineTo $ point (cx - 50) (-g)
     C.closePath
-    C.setSourceRGBA 1.0 1.0 (if highlight then 1.0 else 0.0) 1.0
+    C.setSourceRGBA 1.0 1.0 (if hlmaj then 1.0 else 0.0) 1.0
+    C.fillPreserve
+    C.setSourceRGBA 0.0 0.0 0.0 1.0
+    C.stroke
+    uncurry C.moveTo $ point (cx - 95) (-g)
+    uncurry C.lineTo $ point (cx - 50) (-g)
+    uncurry C.lineTo $ point (cx - 50) 0
+    uncurry C.lineTo $ point (cx - 50) g
+    uncurry C.lineTo $ point (cx - 95) g
+    uncurry C.lineTo $ point (cx - 95) 0
+    uncurry C.lineTo $ point (cx - 95) (-g)
+    C.closePath
+    C.setSourceRGBA 1.0 1.0 (if hlmin then 1.0 else 0.0) 1.0
     C.fillPreserve
     C.setSourceRGBA 0.0 0.0 0.0 1.0
     C.stroke
     uncurry C.moveTo $ point (cx - 30) 0
     C.showText $ show key
-    uncurry C.moveTo $ point (cx - 60) 0
+    uncurry C.moveTo $ point (cx - 75) 0
     C.showText $ (show (down key minor_third)) ++ "m"
 
 
@@ -42,20 +60,23 @@ renderArc cx cy highlight key = do
 -- keys in the Circle of Fifths. The keys of all major chords are added
 -- and the keys of all minor chords are transposed by a minor third. You
 -- can verify this by looking at a Circle of Fifths representation.
-inCircle :: [Key] -> [Key]
-inCircle keys = maj ++ min
+majorChordKeys :: [Key] -> [Key]
+majorChordKeys keys = map fst (filter onlyMaj chords)
             where onlyMaj (_, mode) = "maj" `elem` mode || "maj7" `elem` mode
-                  onlyMin (_, mode) = "m" `elem` mode || "m7" `elem` mode
-                  maj = map fst (filter onlyMaj chords) 
-                  min = map ((flip up $ minor_third) . fst) (filter onlyMin chords)
+                  chords = matchingChords keys
+
+minorChordKeys :: [Key] -> [Key]
+minorChordKeys keys = map fst (filter onlyMin chords)
+            where onlyMin (_, mode) = "m" `elem` mode || "m7" `elem` mode
                   chords = matchingChords keys
 
 -- | Render Circle of Fifths
 renderCircleOfFifths keys (w, h) = do
     let cx = realToFrac w / 2
         cy = realToFrac h / 2
-        highlight = flip elem (inCircle keys)
-    foreach circleOfFifths $ \ key -> renderArc cx cy (highlight key) key
+        hlmaj = flip elem (majorChordKeys keys)
+        hlmin = flip elem (minorChordKeys keys)
+    foreach circleOfFifths $ \ key -> renderArc cx cy key (hlmaj key) (hlmin (down key minor_third))
 
 -- | First try to write a function that renders a piano on the screen. Still
 -- very ugly duckling, needs rewrite.
