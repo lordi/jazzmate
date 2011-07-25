@@ -23,42 +23,35 @@ renderArc :: Double     -- Center x coordinate
             -> C.Render ()
 renderArc cx cy key hlmaj hlmin = do
     let radians = (keyToAngle key) * pi / 180.0 :: Double
-        g = 15 * pi / 180.0 :: Double
-        RGB majr majg majb = hsv (keyToAngle key) (if hlmaj then 1.0 else 0.25) 0.96
+        radiansL = (radians - (pi / 2) - 15 * pi / 180.0)
+        radiansR = (radians - (pi / 2) + 15 * pi / 180.0)
+        RGB majr majg majb = hsv (keyToAngle key) (if hlmaj then 1.0 else 0.25) 0.95
         RGB minr ming minb = hsv (keyToAngle key) (if hlmin then 1.0 else 0.25) 0.8
+        arc min max = do
+            C.newPath
+            C.arc cx cy max radiansL radiansR
+            C.arcNegative cx cy min radiansR radiansL
+            C.closePath
         point dist gamma = (x, y)
             where x = cx + (sin (radians + gamma)) * dist
                   y = cy - (cos (radians + gamma)) * dist
 
-    uncurry C.moveTo $ point (cx - 50) (-g)
-    uncurry C.lineTo $ point (cx - 10) (-g)
-    uncurry C.lineTo $ point (cx - 10) 0
-    uncurry C.lineTo $ point (cx - 10) g
-    uncurry C.lineTo $ point (cx - 50) g
-    uncurry C.lineTo $ point (cx - 50) 0
-    uncurry C.lineTo $ point (cx - 50) (-g)
-    C.closePath
+    -- Render major part of the arc
+    arc (cx - 50) (cx - 10)
     C.setSourceRGBA majr majg majb 1.0
     C.fillPreserve
-    C.setSourceRGBA 0.0 0.0 0.0 1.0
-    C.stroke
-    uncurry C.moveTo $ point (cx - 95) (-g)
-    uncurry C.lineTo $ point (cx - 50) (-g)
-    uncurry C.lineTo $ point (cx - 50) 0
-    uncurry C.lineTo $ point (cx - 50) g
-    uncurry C.lineTo $ point (cx - 95) g
-    uncurry C.lineTo $ point (cx - 95) 0
-    uncurry C.lineTo $ point (cx - 95) (-g)
-    C.closePath
+
+    -- Render minor part of the arc
+    arc (cx - 95) (cx - 50)
     C.setSourceRGBA minr ming minb 1.0
     C.fillPreserve
+
+    -- Render chord names
     C.setSourceRGBA 0.0 0.0 0.0 1.0
-    C.stroke
     uncurry C.moveTo $ point (cx - 30) 0
     C.showText $ show key
     uncurry C.moveTo $ point (cx - 75) 0
     C.showText $ (show (down key minor_third)) ++ "m"
-
 
 -- | For a list of keys, extract the chords and return all corresponding
 -- keys in the Circle of Fifths. The keys of all major chords are added
