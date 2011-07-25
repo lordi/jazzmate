@@ -123,7 +123,7 @@ intervals (x:xs) = (interval x (head xs) : (intervals xs))
 -- counterparts. When the corresponding note is in the input set, it will
 -- be replaced with '#', otherwise ' '.
 --
--- TODO: too ugly/complicated?
+-- FIXME: too ugly/complicated?
 prettyKeys :: S.Set(Key) -> [Char]
 prettyKeys k = concat ["|", linetop, "|\n|", linetop, "|\n|", linetop, "|\n|", lineend, "|\n"]
     where
@@ -133,27 +133,29 @@ prettyKeys k = concat ["|", linetop, "|\n|", linetop, "|\n|", linetop, "|\n|", l
         combo = map (\x -> if (S.member x k) then '#' else ' ') [C .. B]
         bloat p l = map (\(num,cha) -> take num $ repeat cha) $ zip p l
 
--- replace "0" "*" ascii_keyboard
---    where
---        ascii_keyboard = "|00|1|2|3|44|55|6|7|8|9|A|BB|\n"
-
-ppkeys k = putStr $ prettyKeys (keys k)
+-- ppkeys k = putStr $ prettyKeys (keys k)
 -- main = ppkeys (scale C "major")
 --
 -- In music, a whole tone scale is a scale in which each note is separated from its neighbors by the interval of a whole step
 -- isWholeToneScale :: ScaleIntervals -> Bool
 -- isWholeToneScale s = all (== wholetone) s
 
---import Control.Applicative
---guess = filter (sameNotes (Notes [C,E,G])) $ pure chord <*> [C .. B] <*> M.keys chords
---        where sameNotes x y = (keys x) == (keys y)
-
--- TODO: too ugly/complicated?
+-- | For a given list of pressed keys, return a list like [(C, ["maj7"])]
+-- FIXME: too ugly/complicated?
 matchingChords :: [Key] -> [(Key,[String])]
 matchingChords n = filter (not . empty2) $ map (\x -> (x, matches x)) n
             where
                 matches x = M.keys $ M.filter (== (Notes n)) $ M.map (Chord x) chords
                 empty2 k = null $ snd k
+
+-- | Alternative version: Return a list like [(C, True)]
+matchingChords_ keys = map s (matchingChords keys)
+            where s (k, modes)
+                        | "maj" `elem` modes || "maj7" `elem` modes || "7" `elem` modes = (k, Just True)
+                        | "m" `elem` modes || "m7" `elem` modes     = (k, Just False)
+                        | otherwise                                 = (k, Nothing)
+
+
 
 circleOfFifths :: [Key]
 circleOfFifths = take 12 $ iterate (flip up $ perfect_fifth) C
@@ -176,5 +178,4 @@ transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOn p _))})
 transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOff p _))})
             = L.delete $ fromPitch p
 transform _ = id
-
 
