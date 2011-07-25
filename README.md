@@ -11,7 +11,7 @@ My main objective to write this program to learn both musical chord names and Ha
 Screenshot (work in progress)
 ---------------------------------
 
-![Screenshot of the development version](/screenshot.png)
+![Screenshot of the development version](/lordi/scalehs/raw/master/screenshot.png)
 
 As you can see on the screenshot included in this package, the application takes a synaesthetic approach to learning chords and their relationships: A color wheel is mapped onto the circle of fifths with the hope to boost the intuitive learning.
 
