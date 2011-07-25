@@ -4,14 +4,14 @@ scalehs - Scale and Chord Utility for Piano Players
 For a given combination of pressed notes on a MIDI keyboard, scalehs will
 print out all matching chords, as well as ~~an ugly ASCII representation of
 the piano~~ a rocking Cairo rendering of a keyboard layout, highlighting the
-keys in question. Furthermore it displays the circle of fifths, so that the chords' relationships can be easily identified.
+keys in question. Furthermore it displays the [circle of fifths](http://en.wikipedia.org/wiki/Circle_of_fifths), so that the chords' relationships can be easily identified.
 
 My main objective to write this program to learn both musical chord names and Haskell. It is my first Haskell programm so please forgive the stinky code.
 
-Example output (work in progress)
+Screenshot (work in progress)
 ---------------------------------
 
-![Screenshot of the development version](screenshot.png "Screenshot")
+![Screenshot of the development version](/screenshot.png)
 
 As you can see on the screenshot included in this package, the application takes a synaesthetic approach to learning chords and their relationships: A color wheel is mapped onto the circle of fifths with the hope to boost the intuitive learning.
 
