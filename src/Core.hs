@@ -157,8 +157,14 @@ matchingChords_ keys = map s (matchingChords keys)
 
 
 
+-- Circle of Fifths stuff:
 circleOfFifths :: [Key]
 circleOfFifths = take 12 $ iterate (flip up $ perfect_fifth) C
+
+keyToCOFAngle :: Key -> Double
+keyToCOFAngle key = fromIntegral (fromJust $ L.elemIndex key circleOfFifths) * 30.0
+
+
 
 type MyState = [Key]
 

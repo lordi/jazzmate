@@ -8,29 +8,22 @@ import Data.Colour.RGBSpace
 import Data.Colour.RGBSpace.HSV
 
 import Core
+import GUI.Theme
 
 foreach :: (Monad m) => [a] -> (a -> m b) -> m [b]
 foreach = flip mapM
 
--- Circle of Fifths stuff:
-keyToCOFAngle :: Key -> Double
-keyToCOFAngle key = fromIntegral (M.fromJust $ L.elemIndex key circleOfFifths) * 30.0
-
-keyToCOFColor key True hl = hsv (keyToCOFAngle key) (if hl then 1.0 else 0.25) 0.95
-keyToCOFColor key False hl = hsv (keyToCOFAngle (up key minor_third)) (if hl then 1.0 else 0.25) 0.8
-
 renderArc :: Double     -- Center x coordinate
             -> Double   -- Center y coordinate
             -> Key      -- Key in the Circle of Fifths
-            -> Bool     -- If True, highlight the major part of the arc
-            -> Bool     -- If True, highlight the minor part of the arc
+            -> (Key -> Bool -> RGB Double)
             -> C.Render ()
-renderArc cx cy key hlmaj hlmin = do
+renderArc cx cy key colorfunc = do
     let radians = (keyToCOFAngle key) * pi / 180.0 :: Double
         radiansL = (radians - (pi / 2) - 15 * pi / 180.0)
         radiansR = (radians - (pi / 2) + 15 * pi / 180.0)
-        RGB majr majg majb = keyToCOFColor key True hlmaj
-        RGB minr ming minb = keyToCOFColor (down key minor_third) False hlmin
+        RGB majr majg majb = colorfunc key True
+        RGB minr ming minb = colorfunc (key `down` minor_third) False
         arc min max = do
             C.newPath
             C.arc cx cy max radiansL radiansR
@@ -70,28 +63,22 @@ minorChordKeys keys = map fst (filter isMinor $ matchingChords_ keys)
             where isMinor (_,major) = major == Just False
 
 -- | Render Circle of Fifths
-renderCircleOfFifths keys (w, h) = do
+renderCOF colorfunc (w, h) = do
     let cx = realToFrac w / 2
         cy = realToFrac h / 2
-        hlmaj = flip elem (majorChordKeys keys)
-        hlmin = flip elem (minorChordKeys keys)
     C.setLineCap C.LineCapRound
     C.setLineJoin C.LineJoinRound
     C.setLineWidth 2
-    foreach circleOfFifths $ \ key -> renderArc cx cy key (hlmaj key) (hlmin (down key minor_third))
+    foreach circleOfFifths $ \ key -> renderArc cx cy key colorfunc
 
 -- | First try to write a function that renders a piano on the screen. Still
 -- very ugly duckling, needs rewrite.
-renderKeyboard keys (w, h) = do
+renderKeyboard colorfunc (w, h) = do
     let keysize = realToFrac w / 7
         blackheight = realToFrac h * 2 / 3
         br1 = [Db,Eb]
         br2 = [Gb,Ab,Bb]
         wr = [C,D,E,F,G,A,B]
-        color _ ((key,Just isMajor):_) = keyToCOFColor key isMajor True
-        color key _ = (RGB 0.5 0.5 0.5)
-        whitecolor key = if (key `elem` keys) then (color key $ matchingChords_ keys) else (RGB 1.0 1.0 1.0)
-        blackcolor key = if (key `elem` keys) then (color key $ matchingChords_ keys) else (RGB 0.0 0.0 0.0)
         drawKey x y w_ h_ (RGB r g b) = do
                                 C.rectangle x y w_ h_
                                 C.setSourceRGBA r g b 1.0
@@ -104,18 +91,15 @@ renderKeyboard keys (w, h) = do
     C.setLineWidth 1.2
 
     foreach ([0 .. 6] :: [Int]) $ \ x ->
-        do let col = whitecolor $ wr !! x
-           drawKey (realToFrac x * keysize) 0 keysize h col
+        do drawKey (realToFrac x * keysize) 0 keysize h (colorfunc $ wr !! x)
 
     foreach ([0 .. 1] :: [Int]) $ \ x ->
-        do let col = blackcolor $ br1 !! x
-               shiftx = keysize / 2 + (keysize - keysize / 1.3) / 2
-           drawKey (realToFrac x * keysize + shiftx) 0 (keysize / 1.3) blackheight col
+        do let shiftx = keysize / 2 + (keysize - keysize / 1.3) / 2
+           drawKey (realToFrac x * keysize + shiftx) 0 (keysize / 1.3) blackheight (colorfunc $ br1 !! x)
 
     foreach ([0 .. 2] :: [Int]) $ \ x ->
-        do let col = blackcolor $ br2 !! x
-               shiftx = keysize * 3.5 + (keysize - keysize / 1.3) / 2
-           drawKey (realToFrac x * keysize + shiftx) 0 (keysize / 1.3) blackheight col
+        do let shiftx = keysize * 3.5 + (keysize - keysize / 1.3) / 2
+           drawKey (realToFrac x * keysize + shiftx) 0 (keysize / 1.3) blackheight (colorfunc $ br2 !! x)
 
 
 renderCanvas st (w, h) = do
@@ -124,7 +108,7 @@ renderCanvas st (w, h) = do
     C.moveTo 150 250; C.showText $ show st
     C.moveTo 10 270; C.showText $ "Matching chords: "
     C.moveTo 150 270; C.showText $ show (matchingChords st)
-    renderKeyboard st (300, 200)
+    renderKeyboard (rainbowKeyboard st) (300, 200)
     C.translate 300 0
-    renderCircleOfFifths st (300, 300)
+    renderCOF (rainbowCOF st) (300, 300)
 
