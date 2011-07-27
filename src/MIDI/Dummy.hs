@@ -1,5 +1,8 @@
 module MIDI.Dummy where
 
+import qualified Data.Map as M
+import qualified Data.Set as S
+
 import Control.Monad.State
 import Control.Concurrent
 import Control.Concurrent.Chan
@@ -7,6 +10,8 @@ import Control.Concurrent.Chan
 import qualified Sound.MIDI.Message as Msg
 import qualified Sound.MIDI.Message.Channel       as ChannelMsg
 import qualified Sound.MIDI.Message.Channel.Voice as VoiceMsg
+
+import Random
 
 import Core
 
@@ -23,26 +28,20 @@ keyoff chan vel key = (Msg.Channel (ChannelMsg.Cons chan voice))
     where voice = ChannelMsg.Voice (VoiceMsg.NoteOff pitch vel)
           pitch = toPitch key
 
+pick :: [a] -> IO a
+pick xs = do
+    r <- randomRIO (0, (length xs - 1))
+    return $ xs !! r
+
 sendMIDIsequence send = do
                         let chan   = ChannelMsg.toChannel 3
                             vel    = VoiceMsg.toVelocity 64
                             secs s = s * 1000000
-                        threadDelay $ secs 1
-                        send $ keyon chan vel C
-                        threadDelay $ secs 1
-                        send $ keyon chan vel Eb
-                        threadDelay $ secs 1
-                        send $ keyon chan vel G
-                        threadDelay $ secs 3
-                        send $ keyoff chan vel C
-                        send $ keyoff chan vel Eb
-                        send $ keyoff chan vel G
-                        send $ keyon chan vel D
-                        threadDelay $ secs 1
-                        send $ keyon chan vel G
-                        threadDelay $ secs 1
-                        send $ keyon chan vel B
-                        threadDelay $ secs 3
-                        send $ keyoff chan vel D
-                        send $ keyoff chan vel G
-                        send $ keyoff chan vel B
+                            on key = do threadDelay (secs 1); send $ keyon chan vel key; return ()
+                            off key = do send $ keyoff chan vel key; return ()
+                        key <- pick [C .. B]
+                        cname <- pick $ M.keys chords
+                        mapM on (S.toList $ keys (chord key cname))
+                        threadDelay (secs 2)
+                        mapM off (S.toList $ keys (chord key cname))
+
