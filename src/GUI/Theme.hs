@@ -35,28 +35,14 @@ rainbowKeyboard pressedKeys key
 
 rainbowCOF :: [Key] -> Key -> Bool -> RGB Double
 rainbowCOF pressedKeys key isMajor
-    | (key, Just isMajor) `elem` chords     = chordsToCOFColor [(key, Just isMajor)]
-    | otherwise                             = unhighlight $ chordsToCOFColor [(key, Just isMajor)]
+    | (key, Just isMajor) `elem` chords = chordsToCOFColor [(key, Just isMajor)]
+    | otherwise                         = dampen $ chordsToCOFColor [(key, Just isMajor)]
     where
         chords = matchingChords_ pressedKeys
+        dampen r = hsv (hue r) 0.25 (value r)
 
 chordsToCOFColor ((key, Just isMajor):_)
                 | isMajor       = hsv (keyToCOFAngle key) 1.0 0.95
                 | otherwise     = hsv (keyToCOFAngle (key `up` minor_third)) 1.0 0.8
 chordsToCOFColor _ = RGB 0.5 0.5 0.5
-
-unhighlight r = hsv h 0.3 v
-    where h = hue r
---          s = saturation r
-          v = value r
-
-
--- hlmaj = flip elem (majorChordKeys keys)
--- hlmin = flip elem (minorChordKeys keys)
---        color _ ((key,Just isMajor):_) = keyToCOFColor key isMajor True
---        color key _ = (RGB 0.5 0.5 0.5)
---        whitecolor key = if (key `elem` keys) then (color key $ matchingChords_ keys) else (RGB 1.0 1.0 1.0)
---        blackcolor key = if (key `elem` keys) then (color key $ matchingChords_ keys) else (RGB 0.0 0.0 0.0)
-----keyToCOFColor key True hl = hsv (keyToCOFAngle key) (if hl then 1.0 else 0.25) 0.95
---keyToCOFColor key False hl = hsv (keyToCOFAngle (up key minor_third)) (if hl then 1.0 else 0.25) 0.8
 

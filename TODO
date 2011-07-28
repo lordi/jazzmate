@@ -8,6 +8,6 @@
 * Dynamic size
 * ability to specify split key
 * break up render functions into own .hs files
-* ability to give the render function custom color functions so that
-  the coloring can be turned of easily (in case its annoying)
+[X] ability to give the render function custom color functions so that
+    the coloring can be turned of easily (in case its annoying)
 
