@@ -13,6 +13,13 @@ import GUI.Theme
 foreach :: (Monad m) => [a] -> (a -> m b) -> m [b]
 foreach = flip mapM
 
+centerShowText :: String -> Double -> Double -> C.Render ()
+centerShowText s cx cy = do
+            te <- C.textExtents s
+            C.moveTo (cx - (C.textExtentsWidth te)/2) (cy + (C.textExtentsHeight te)/2)
+            C.showText s
+            return ()
+
 renderArc :: Double     -- Center x coordinate
             -> Double   -- Center y coordinate
             -> Key      -- Key in the Circle of Fifths
@@ -45,10 +52,8 @@ renderArc cx cy key colorfunc = do
 
     -- Render chord names
     C.setSourceRGBA 0.0 0.0 0.0 1.0
-    uncurry C.moveTo $ point (cx - 30) 0
-    C.showText $ show key
-    uncurry C.moveTo $ point (cx - 75) 0
-    C.showText $ (show (down key minor_third)) ++ "m"
+    uncurry (centerShowText (show key)) $ point (cx - 30) 0
+    uncurry (centerShowText $ show (down key minor_third) ++ "m") $ point (cx - 75) 0
 
 -- | For a list of keys, extract the chords and return all corresponding
 -- keys in the Circle of Fifths. The keys of all major chords are added
@@ -103,12 +108,16 @@ renderKeyboard colorfunc (w, h) = do
 
 
 renderCanvas st (w, h) = do
+    C.setFontSize 15
     C.setSourceRGBA 0 0 0 1.0
-    C.moveTo 10 250; C.showText $ "Currently pressed keys: "
-    C.moveTo 150 250; C.showText $ show st
+    C.moveTo 10 250; C.showText $ "Currently hit notes: "
+    C.moveTo 200 250; C.showText $ niceList (map show st)
     C.moveTo 10 270; C.showText $ "Matching chords: "
-    C.moveTo 150 270; C.showText $ show (matchingChords st)
+    C.moveTo 200 270; C.showText $ niceList (map niceChord (matchingChords st))
     renderKeyboard (rainbowKeyboard st) (300, 200)
     C.translate 300 0
     renderCOF (rainbowCOF st) (300, 300)
+    where niceChord (key, names) = niceList $ map (\n -> (show key) ++ n) names
+          niceList lst = concat (L.intersperse " " lst) 
+    
 
