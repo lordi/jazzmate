@@ -14,4 +14,5 @@ Some further ideas to implement
 * break up render functions into own .hs files
 * ~~ability to give the render function custom color functions so that the
   coloring can be turned of easily (in case its annoying)~~
-
+* clean up Core.hs (maybe use https://music-theory.googlecode.com/svn-history/r18/trunk/MusicTheory.hs which appears to be very similar yet much cleaner)
+* GTK dropdown box for MIDI input / split key
