@@ -26,9 +26,9 @@ display of the pressed notes.
 
 Last but not least, the core of the program consists of purely functional code
 to juggle with notes, scales and chords. To do that, I incorporate a nice and
-clean Haskell module called MusicTheory (also available (here)[https://music-theory.googlecode.com/])
-that implements a great deal of western music theory. Whenever needed, this
-is extended in the Core module.
+clean Haskell module called MusicTheory (also available 
+[here](https://music-theory.googlecode.com/)) that implements a great deal of 
+western music theory. Whenever needed, this is extended in the Core module.
 
 Requirements
 ------------
