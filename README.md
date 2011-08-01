@@ -17,15 +17,18 @@ Code structure
 --------------
 
 The program is written in Haskell and interfaces with the JACK audio daemon to
-receive MIDI input. This happens in the MIDIBridge module by creating a Chan
-and subsequently feeding MIDI messages to it.
+receive MIDI input. This happens in the MIDI.JackBridge module by creating a
+Chan and subsequently feeding MIDI messages to it.
 
 The Main module is responsible to collect the notes from the Chan and store
 them in a state variable. It creates a GTK window and uses Cairo to render a
 display of the pressed notes.
 
-Last but not least, the Core module consists of purely functional code to
-manipulate scales and retrieve chords.
+Last but not least, the core of the program consists of purely functional code
+to juggle with notes, scales and chords. To do that, I incorporate a nice and
+clean Haskell module called MusicTheory (also available (here)[https://music-theory.googlecode.com/])
+that implements a great deal of western music theory. Whenever needed, this
+is extended in the Core module.
 
 Requirements
 ------------

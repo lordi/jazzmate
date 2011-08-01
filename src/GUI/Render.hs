@@ -19,7 +19,7 @@ centerShowText s cx cy = do
             C.moveTo (cx - (C.textExtentsWidth te)/2) (cy + (C.textExtentsHeight te)/2)
             C.showText s
             return ()
-
+{-
 renderArc :: Double     -- Center x coordinate
             -> Double   -- Center y coordinate
             -> Key      -- Key in the Circle of Fifths
@@ -76,13 +76,14 @@ renderCOF colorfunc (w, h) = do
     C.setLineWidth 2
     foreach circleOfFifths $ \ key -> renderArc cx cy key colorfunc
 
+-}
 -- | First try to write a function that renders a piano on the screen. Still
 -- very ugly duckling, needs rewrite.
 renderKeyboard colorfunc (w, h) = do
     let keysize = realToFrac w / 7
         blackheight = realToFrac h * 2 / 3
-        br1 = [Db,Eb]
-        br2 = [Gb,Ab,Bb]
+        br1 = [C',D']
+        br2 = [F',G',A']
         wr = [C,D,E,F,G,A,B]
         drawKey x y w_ h_ (RGB r g b) = do
                                 C.rectangle x y w_ h_
@@ -107,17 +108,17 @@ renderKeyboard colorfunc (w, h) = do
            drawKey (realToFrac x * keysize + shiftx) 0 (keysize / 1.3) blackheight (colorfunc $ br2 !! x)
 
 
+
 renderCanvas st (w, h) = do
     C.setFontSize 15
     C.setSourceRGBA 0 0 0 1.0
-    C.moveTo 10 250; C.showText $ "Currently hit notes: "
-    C.moveTo 200 250; C.showText $ niceList (map show st)
-    C.moveTo 10 270; C.showText $ "Matching chords: "
-    C.moveTo 200 270; C.showText $ niceList (map niceChord (matchingChords st))
-    renderKeyboard (rainbowKeyboard st) (300, 200)
-    C.translate 300 0
-    renderCOF (rainbowCOF st) (300, 300)
-    where niceChord (key, names) = niceList $ map (\n -> (show key) ++ n) names
-          niceList lst = concat (L.intersperse " " lst) 
-    
+    C.moveTo 10 250;    C.showText $ "Currently hit notes: "
+    C.moveTo 240 250;   C.showText $ niceList 12 (map show st)
+    C.moveTo 10 270;    C.showText $ "Chord with only these notes: "
+    C.moveTo 240 270;   C.showText $ niceList 1 (map show (chordsWithExactNotes st))
+    C.moveTo 10 290;    C.showText $ "All chords with these notes:"
+    C.moveTo 240 290;   C.showText $ niceList 5 (map show (chordsWithNotes st))
+    C.translate 0 0;    renderKeyboard (grayKeyboard st) (300, 200)
+    --C.translate 300 0;  renderCOF (rainbowCOF st) (300, 300)
+    where niceList n lst = concat (L.intersperse " " (take n lst))
 

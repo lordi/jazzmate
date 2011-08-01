@@ -1,5 +1,41 @@
-module Core where
+module Core (module MusicTheory, blackNotes, chordsWithNotes,
+    chordsWithExactNotes, toPitch, fromPitch) where
 
+import qualified Data.List as L
+import qualified Sound.MIDI.Message as Msg
+import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
+import qualified Sound.MIDI.Message.Channel.Voice as V
+
+import MusicTheory
+
+blackNotes = [C',D',F',G',A']
+
+chordsWithNotes :: [Note] -> [Chord]
+chordsWithNotes [] = []
+chordsWithNotes ns =
+    [ chord |
+        n <- [minBound..],
+        t <- [minBound..],
+        let chord = Chord n t,
+        all (inChord chord) ns]
+
+chordsWithExactNotes :: [Note] -> [Chord]
+chordsWithExactNotes ns =
+    [ chord |
+        chord <- chordsWithNotes ns,
+        null $ (notes chord) L.\\ ns]
+
+-- | Converts a MIDI pitch to a Note as defined in MusicTheory
+fromPitch :: V.Pitch -> Note
+fromPitch p = toEnum ((V.fromPitch p) `mod` (fromEnum PerfectOctave))-- octave)
+
+toPitch :: Note -> V.Pitch
+toPitch k = V.toPitch (fromEnum k)
+
+
+
+
+{-
 import qualified Data.Set as S
 import qualified Data.List as L
 import qualified Data.Map as M
@@ -110,31 +146,6 @@ intervals (x:xs) = (interval x (head xs) : (intervals xs))
 -- True
 -- *Core> (chord C "maj") == (Notes [C, G, E, F])
 -- False
-
--- | prettyKeys: print out ASCII representation of a keyboard in the 
--- following form:
---
---  |CC|d|D|e|EE|FF|g|G|a|A|b|BB|
---  |CC|d|D|e|EE|FF|g|G|a|A|b|BB|
---  |CC|d|D|e|EE|FF|g|G|a|A|b|BB|
---  |CCC|DDD|EEE|FFF|GGG|AAA|BBB|
---
--- The small letter characters stand for the flat version of their capital
--- counterparts. When the corresponding note is in the input set, it will
--- be replaced with '#', otherwise ' '.
---
--- FIXME: too ugly/complicated?
-prettyKeys :: S.Set(Key) -> [Char]
-prettyKeys k = concat ["|", linetop, "|\n|", linetop, "|\n|", linetop, "|\n|", lineend, "|\n"]
-    where
-        clean arr = concat (L.intersperse "|" $ filter (\x -> length x > 0) arr)
-        linetop = clean $ bloat [2,1,1,1,2,2,1,1,1,1,1,2] combo
-        lineend = clean $ bloat [3,0,3,0,3,3,0,3,0,3,0,3] combo
-        combo = map (\x -> if (S.member x k) then '#' else ' ') [C .. B]
-        bloat p l = map (\(num,cha) -> take num $ repeat cha) $ zip p l
-
--- ppkeys k = putStr $ prettyKeys (keys k)
--- main = ppkeys (scale C "major")
 --
 -- In music, a whole tone scale is a scale in which each note is separated from its neighbors by the interval of a whole step
 -- isWholeToneScale :: ScaleIntervals -> Bool
@@ -168,20 +179,13 @@ keyToCOFAngle key = fromIntegral (fromJust $ L.elemIndex key circleOfFifths) * 3
 
 type MyState = [Key]
 
--- | Converts a MIDI pitch to an element from the Key enum defined in Core
-fromPitch :: V.Pitch -> Key
-fromPitch p = toEnum ((V.fromPitch p) `mod` octave)
-
-toPitch :: Key -> V.Pitch
-toPitch k = V.toPitch (fromEnum k)
-
 -- | The core of this module's functionality: Take a MIDI message and a list
 -- of keys, and return the resulting list. Pressing a key will add the
 -- corresponding note to the list, lifting it will delete it.
 transform :: Msg.T -> [Key] -> [Key]
-transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOn p _))})
+transform (Msg.Channel Cons {messageBody = (Voice (V.KeyOn p _))})
             = (:) $ fromPitch p
-transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOff p _))})
+transform (Msg.Channel Cons {messageBody = (Voice (V.KeyOff p _))})
             = L.delete $ fromPitch p
 transform _ = id
-
+-}

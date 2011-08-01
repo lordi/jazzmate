@@ -39,9 +39,9 @@ sendMIDIsequence send = do
                             secs s = s * 1000000
                             on key = do threadDelay (secs 1); send $ keyon chan vel key; return ()
                             off key = do send $ keyoff chan vel key; return ()
-                        key <- pick [C .. B]
-                        cname <- pick $ M.keys chords
-                        mapM on (S.toList $ keys (chord key cname))
+                        key <- pick [minBound .. maxBound]
+                        ctype <- pick [minBound .. maxBound]
+                        mapM on $ notes (Chord ctype key)
                         threadDelay (secs 2)
-                        mapM off (S.toList $ keys (chord key cname))
+                        mapM off $ notes (Chord ctype key)
 

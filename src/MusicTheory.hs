@@ -1,3 +1,6 @@
+-- |Western Music Theory, taken from https://music-theory.googlecode.com/
+module MusicTheory where
+
 import Data.List
 import Data.Maybe
 import Monad

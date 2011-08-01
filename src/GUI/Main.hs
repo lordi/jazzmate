@@ -1,11 +1,26 @@
 module GUI.Main where
 
+import qualified Data.List as L
 import Control.Monad.State
 import Control.Concurrent
 import Graphics.UI.Gtk
 
+import qualified Sound.MIDI.Message as Msg
+import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
+import qualified Sound.MIDI.Message.Channel.Voice as V
+
 import Core
 import GUI.Render (renderCanvas)
+
+-- | The core of this module's functionality: Take a MIDI message and a list
+-- of keys, and return the resulting list. Pressing a key will add the
+-- corresponding note to the list, lifting it will delete it.
+transform :: Msg.T -> [Note] -> [Note]
+transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOn p _))})
+            = (:) $ fromPitch p
+transform (Msg.Channel Cons {messageBody = (Voice (V.NoteOff p _))})
+            = L.delete $ fromPitch p
+transform _ = id
 
 -- | Invalidate a widget so that the expose event will be fired. This causes
 -- the widget to get redrawn.
