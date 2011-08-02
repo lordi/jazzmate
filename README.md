@@ -11,7 +11,7 @@ Screenshot (work in progress)
 
 ![Screenshot of the development version](/lordi/scalehs/raw/master/screenshot.png)
 
-As you can see in the above screenshot, the application utilizes a synaesthetic approach to help the user learn chords and their relationships: A color wheel is mapped onto the circle of fifths to aid the intuitive learning, and the chord's color is also used on the piano display on the left.
+~~As you can see in the above screenshot, the application utilizes a synaesthetic approach to help the user learn chords and their relationships: A color wheel is mapped onto the circle of fifths to aid the intuitive learning, and the chord's color is also used on the piano display on the left.~~
 
 Code structure
 --------------

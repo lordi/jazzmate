@@ -36,26 +36,40 @@ renderArc cx cy key colorfunc = do
             C.arc cx cy max radiansL radiansR
             C.arcNegative cx cy min radiansR radiansL
             C.closePath
---            C.setSourceRGBA 0.0 0.0 0.0 1.0
---            C.stroke
         point dist gamma = (x, y)
             where x = cx + (sin (radians + gamma)) * dist
                   y = cy - (cos (radians + gamma)) * dist
 
+    C.setLineWidth 0.8
+
     -- Render major part of the arc
-    arc (cx - 50) (cx - 10)
+    arc (cx - 40) cx
     C.setSourceRGBA majr majg majb 1.0
     C.fillPreserve
+    C.setSourceRGBA 0.0 0.0 0.0 1.0
+    C.stroke
 
     -- Render minor part of the arc
-    arc (cx - 95) (cx - 50)
+    arc (cx - 80) (cx - 40)
     C.setSourceRGBA minr ming minb 1.0
     C.fillPreserve
+    C.setSourceRGBA 0.0 0.0 0.0 1.0
+    C.stroke
+
+    -- Paint thick border around the arc
+    C.setLineWidth 2
+    C.newPath
+    C.arc cx cy cx radiansL radiansR
+    C.stroke
+    C.newPath
+    C.arc cx cy (cx - 80) radiansL radiansR
+    C.stroke
 
     -- Render chord names
-    C.setSourceRGBA 0.0 0.0 0.0 1.0
-    uncurry (centerShowText (show key)) $ point (cx - 30) 0
-    uncurry (centerShowText $ show (key `add` MajorSixth) ++ "m") $ point (cx - 75) 0
+    C.setFontSize 16
+    uncurry (centerShowText (show key)) $ point (cx - 20) 0
+    C.setFontSize 12
+    uncurry (centerShowText $ show (key `add` MajorSixth) ++ "m") $ point (cx - 60) 0
 
 
 -- | Render Circle of Fifths
@@ -64,7 +78,6 @@ renderCOF colorfunc (w, h) = do
         cy = realToFrac h / 2
     C.setLineCap C.LineCapRound
     C.setLineJoin C.LineJoinRound
-    C.setLineWidth 2
     foreach (take 12 $ circleOfFifths C) $ \ note -> renderArc cx cy note colorfunc
 
 -- | First try to write a function that renders a piano on the screen. Still
@@ -100,15 +113,21 @@ renderKeyboard colorfunc (w, h) = do
 
 
 renderCanvas st (w, h) = do
-    C.setFontSize 15
+
     C.setSourceRGBA 0 0 0 1.0
-    C.moveTo 10 250;    C.showText $ "Currently hit notes: "
-    C.moveTo 240 250;   C.showText $ niceList 12 (map show st)
-    C.moveTo 10 270;    C.showText $ "Chord with only these notes: "
-    C.moveTo 240 270;   C.showText $ niceList 1 (map show (chordsWithExactNotes st))
-    C.moveTo 10 290;    C.showText $ "All chords with these notes:"
-    C.moveTo 240 290;   C.showText $ niceList 5 (map show (chordsWithNotes st))
-    C.translate 0 0;    renderKeyboard (grayKeyboard st) (300, 200)
-    C.translate 300 0;  renderCOF (grayCOF st) (300, 300)
+
+    C.setFontSize 14
+    C.moveTo 10 20;     C.showText $ "Current notes:"
+    C.moveTo 270 20;    C.showText $ "Current chord:"
+    C.moveTo 10 330;    C.showText $ "All chords with these notes:"
+
+    C.setFontSize 20
+    C.moveTo 10 50;     C.showText $ niceList 12 (map show st)
+    C.moveTo 270 50;    C.showText $ niceList 1 (map show (chordsWithExactNotes st))
+    C.moveTo 10 360;    C.showText $ niceList 10 (map show (chordsWithNotes st))
+
+    C.translate 10 70;  renderKeyboard (grayKeyboard st) (250, 180)
+    C.translate 270 0;  renderCOF (grayCOF st) (250, 250)
+
     where niceList n lst = concat (L.intersperse " " (take n lst))
 
