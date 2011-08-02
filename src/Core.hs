@@ -1,6 +1,7 @@
 module Core (module MusicTheory, blackNotes, chordsWithNotes,
-    chordsWithExactNotes, toPitch, fromPitch) where
+    chordsWithExactNotes, toPitch, fromPitch, noteToCOFAngle) where
 
+import qualified Data.Maybe as M
 import qualified Data.List as L
 import qualified Sound.MIDI.Message as Msg
 import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
@@ -9,6 +10,8 @@ import qualified Sound.MIDI.Message.Channel.Voice as V
 import MusicTheory
 
 blackNotes = [C',D',F',G',A']
+
+noteToCOFAngle n = fromIntegral (M.fromJust $ L.elemIndex n (circleOfFifths C)) * 30.0
 
 chordsWithNotes :: [Note] -> [Chord]
 chordsWithNotes [] = []
@@ -31,7 +34,6 @@ fromPitch p = toEnum ((V.fromPitch p) `mod` (fromEnum PerfectOctave))-- octave)
 
 toPitch :: Note -> V.Pitch
 toPitch k = V.toPitch (fromEnum k)
-
 
 
 
