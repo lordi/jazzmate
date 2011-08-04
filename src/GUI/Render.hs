@@ -112,22 +112,25 @@ renderKeyboard colorfunc (w, h) = do
 
 
 
-renderCanvas st (w, h) = do
+renderCanvas (currentNotes, historyNotes) = do
 
     C.setSourceRGBA 0 0 0 1.0
 
     C.setFontSize 14
     C.moveTo 10 20;     C.showText $ "Current notes:"
     C.moveTo 270 20;    C.showText $ "Current chord:"
+    C.moveTo 550 20;    C.showText $ "Current scale:"
     C.moveTo 10 330;    C.showText $ "All chords with these notes:"
 
     C.setFontSize 20
-    C.moveTo 10 50;     C.showText $ niceList 12 (map show st)
-    C.moveTo 270 50;    C.showText $ niceList 1 (map show (chordsWithExactNotes st))
-    C.moveTo 10 360;    C.showText $ niceList 10 (map show (chordsWithNotes st))
+    C.moveTo 10 50;     C.showText $ niceList 12 (map show currentNotes)
+    C.moveTo 270 50;    C.showText $ niceList 1 (map show (chordsWithExactNotes currentNotes))
+    C.moveTo 550 50;    C.showText $ niceList 1 (map show (scalesWithNotes historyNotes))
+    C.moveTo 10 360;    C.showText $ niceList 10 (map show (chordsWithNotes currentNotes))
 
-    C.translate 10 70;  renderKeyboard (grayKeyboard st) (250, 180)
-    C.translate 270 0;  renderCOF (grayCOF st) (250, 250)
+    C.translate 10 70;  renderKeyboard (grayKeyboard currentNotes) (250, 180)
+    C.translate 270 0;  renderCOF (grayCOF currentNotes) (250, 250)
+    C.translate 270 0;  renderKeyboard (grayKeyboard historyNotes) (250, 180)
 
     where niceList n lst = concat (L.intersperse " " (take n lst))
 

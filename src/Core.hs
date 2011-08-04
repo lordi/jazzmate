@@ -1,5 +1,6 @@
 module Core (module MusicTheory, blackNotes, chordsWithNotes,
-    chordsWithExactNotes, toPitch, fromPitch, noteToCOFAngle) where
+    chordsWithExactNotes, toPitch, fromPitch, noteToCOFAngle,
+    scalesWithNotes) where
 
 import qualified Data.Maybe as M
 import qualified Data.List as L
@@ -27,6 +28,10 @@ chordsWithExactNotes ns =
     [ chord |
         chord <- chordsWithNotes ns,
         null $ (notes chord) L.\\ ns]
+
+
+scalesWithNotes :: [Note] -> [Scale]
+scalesWithNotes notes = [Scale C MajorDiatonic]
 
 -- | Converts a MIDI pitch to a Note as defined in MusicTheory
 fromPitch :: V.Pitch -> Note
@@ -104,90 +109,4 @@ chords = M.fromList [
     ("sus2",    [unison, wholetone, perfect_fifth]),
     ("sus4",    [unison, perfect_fourth, perfect_fifth])
     ]
-
-
-
-data Notes = Scale Key ScaleIntervals | Chord Key ChordIntervals | Notes [Key]
-
-instance Eq Notes where
-    x == y = (keys x) == (keys y)
-
-scale key mode = Scale key (fromJust $ M.lookup mode scales)
-chord key ch = Chord key (fromJust $ M.lookup ch chords)
-
--- The following functions define cyclic movements on the keys
-semitone_up :: Key -> Key
-semitone_up B = C
-semitone_up k = succ k
-
-semitone_down :: Key -> Key
-semitone_down C = B
-semitone_down k = pred k
-
-up :: Key -> Interval -> Key
-up k i = (iterate semitone_up k) !! i
-
-down :: Key -> Interval -> Key
-down k i = (iterate semitone_down k) !! i
-
-keys :: Notes -> S.Set(Key)
-keys (Scale key is) = S.fromList keylist
-    where keylist = foldl (\k i -> (head k `up` i) : k) [key] is
-keys (Chord key is) = S.fromList $ map (up key) is
-keys (Notes k) = S.fromList k
-
-interval :: Key -> Key -> Interval
-interval a b = ((fromEnum a) - (fromEnum b)) `mod` octave
-
-intervals :: [Key] -> ScaleIntervals
-intervals [] = []
-intervals (x:[]) = []
-intervals (x:xs) = (interval x (head xs) : (intervals xs))
-
--- *Core> (chord C "maj") == (Notes [C, G, E])
--- True
--- *Core> (chord C "maj") == (Notes [C, G, E, F])
--- False
---
--- In music, a whole tone scale is a scale in which each note is separated from its neighbors by the interval of a whole step
--- isWholeToneScale :: ScaleIntervals -> Bool
--- isWholeToneScale s = all (== wholetone) s
-
--- | For a given list of pressed keys, return a list like [(C, ["maj7"])]
--- FIXME: too ugly/complicated?
-matchingChords :: [Key] -> [(Key,[String])]
-matchingChords n = filter (not . empty2) $ map (\x -> (x, matches x)) n
-            where
-                matches x = M.keys $ M.filter (== (Notes n)) $ M.map (Chord x) chords
-                empty2 k = null $ snd k
-
--- | Alternative version: Return a list like [(C, True)]
-matchingChords_ keys = map s (matchingChords keys)
-            where s (k, modes)
-                        | "maj" `elem` modes || "maj7" `elem` modes || "7" `elem` modes = (k, Just True)
-                        | "m" `elem` modes || "m7" `elem` modes     = (k, Just False)
-                        | otherwise                                 = (k, Nothing)
-
-
-
--- Circle of Fifths stuff:
-circleOfFifths :: [Key]
-circleOfFifths = take 12 $ iterate (flip up $ perfect_fifth) C
-
-keyToCOFAngle :: Key -> Double
-keyToCOFAngle key = fromIntegral (fromJust $ L.elemIndex key circleOfFifths) * 30.0
-
-
-
-type MyState = [Key]
-
--- | The core of this module's functionality: Take a MIDI message and a list
--- of keys, and return the resulting list. Pressing a key will add the
--- corresponding note to the list, lifting it will delete it.
-transform :: Msg.T -> [Key] -> [Key]
-transform (Msg.Channel Cons {messageBody = (Voice (V.KeyOn p _))})
-            = (:) $ fromPitch p
-transform (Msg.Channel Cons {messageBody = (Voice (V.KeyOff p _))})
-            = L.delete $ fromPitch p
-transform _ = id
--}
+--}
