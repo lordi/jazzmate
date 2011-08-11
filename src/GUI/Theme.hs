@@ -1,6 +1,8 @@
 module GUI.Theme where
 
 import qualified Data.List as L
+import qualified Data.Map as M
+import Data.Maybe
 
 import Data.Colour.RGBSpace
 import Data.Colour.RGBSpace.HSV
@@ -16,6 +18,12 @@ grayKeyboard pressedNotes n
     | n `elem` pressedNotes = RGB 0.5 0.5 0.5
     | n `elem` blackNotes   = RGB 0.0 0.0 0.0
     | otherwise             = RGB 1.0 1.0 1.0
+
+grayDistributionKeyboard :: [Note] -> Note -> RGB Double
+grayDistributionKeyboard pressedNotes n
+    | otherwise             = RGB s 1.0 s
+    where s = 1 / (1 + (fromIntegral $ M.findWithDefault 0 n (histogram pressedNotes)))
+
 
 grayCOF :: [Note] -> Note -> Bool -> RGB Double
 grayCOF pressedNotes note isMajor

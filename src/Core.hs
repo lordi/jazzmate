@@ -1,9 +1,10 @@
 module Core (module MusicTheory, blackNotes, chordsWithNotes,
     chordsWithExactNotes, toPitch, fromPitch, noteToCOFAngle,
-    scalesWithNotes) where
+    scalesWithNotes, histogram) where
 
-import qualified Data.Maybe as M
+import Data.Maybe
 import qualified Data.List as L
+import qualified Data.Map as M
 import qualified Sound.MIDI.Message as Msg
 import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
 import qualified Sound.MIDI.Message.Channel.Voice as V
@@ -12,7 +13,7 @@ import MusicTheory
 
 blackNotes = [C',D',F',G',A']
 
-noteToCOFAngle n = fromIntegral (M.fromJust $ L.elemIndex n (circleOfFifths C)) * 30.0
+noteToCOFAngle n = fromIntegral (fromJust $ L.elemIndex n (circleOfFifths C)) * 30.0
 
 chordsWithNotes :: [Note] -> [Chord]
 chordsWithNotes [] = []
@@ -29,9 +30,16 @@ chordsWithExactNotes ns =
         chord <- chordsWithNotes ns,
         null $ (notes chord) L.\\ ns]
 
-
 scalesWithNotes :: [Note] -> [Scale]
-scalesWithNotes notes = [Scale C MajorDiatonic]
+scalesWithNotes ns =
+    [ scale |
+        n <- [minBound..],
+        t <- [minBound..],
+        let scale = Scale n t,
+        all (flip elem (notes scale)) ns && (null $ (notes scale) L.\\ ns)]
+
+histogram :: Ord a => [a] -> M.Map a Int
+histogram xs = M.fromList [ (head l, length l) | l <- L.group (L.sort xs) ]
 
 -- | Converts a MIDI pitch to a Note as defined in MusicTheory
 fromPitch :: V.Pitch -> Note

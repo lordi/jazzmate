@@ -130,7 +130,7 @@ renderCanvas (currentNotes, historyNotes) = do
 
     C.translate 10 70;  renderKeyboard (grayKeyboard currentNotes) (250, 180)
     C.translate 270 0;  renderCOF (grayCOF currentNotes) (250, 250)
-    C.translate 270 0;  renderKeyboard (grayKeyboard historyNotes) (250, 180)
+    C.translate 270 0;  renderKeyboard (grayDistributionKeyboard historyNotes) (250, 180)
 
     where niceList n lst = concat (L.intersperse " " (take n lst))
 

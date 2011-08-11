@@ -12,6 +12,8 @@ import qualified Sound.MIDI.Message.Channel.Voice as V
 import Core
 import GUI.Render (renderCanvas)
 
+historyLength = 40
+
 -- | The core of this module's functionality: Take a MIDI message and a list
 -- of keys, and return the resulting list. Pressing a key will add the
 -- corresponding note to the list, lifting it will delete it.
@@ -25,7 +27,7 @@ transform _ = id
 -- | If a note is pressed, add it to the history.
 record :: Msg.T -> [Note] -> [Note]
 record (Msg.Channel Cons {messageBody = (Voice (V.NoteOn p _))})
-            = ((:) $ fromPitch p) . take 10
+            = ((:) $ fromPitch p) . take historyLength
 record _ = id
 
 -- | For every message that is read from the Chan, the state that is stored
@@ -34,7 +36,7 @@ updateState ch stvar = do
     msg <- readChan ch
     modifyMVar_ stvar $ return . (\(c, h) -> (transform msg c, record msg h))
     (_,history) <- readMVar stvar
-    putStrLn (show history)
+    putStrLn (show (histogram history))
 
 -- | Invalidate a widget so that the expose event will be fired. This causes
 -- the widget to get redrawn.
