@@ -100,7 +100,7 @@ renderKeyboard colorfunc (w, h) = do
     C.setLineWidth 1.2
 
     foreach ([0 .. 6] :: [Int]) $ \ x ->
-        do drawKey (realToFrac x * keysize) 0 keysize h (colorfunc $ wr !! x)
+        drawKey (realToFrac x * keysize) 0 keysize h (colorfunc $ wr !! x)
 
     foreach ([0 .. 1] :: [Int]) $ \ x ->
         do let shiftx = keysize / 2 + (keysize - keysize / 1.3) / 2
@@ -117,10 +117,10 @@ renderCanvas (currentNotes, historyNotes) = do
     C.setSourceRGBA 0 0 0 1.0
 
     C.setFontSize 14
-    C.moveTo 10 20;     C.showText $ "Current notes:"
-    C.moveTo 270 20;    C.showText $ "Current chord:"
-    C.moveTo 550 20;    C.showText $ "Current scale:"
-    C.moveTo 10 330;    C.showText $ "All chords with these notes:"
+    C.moveTo 10 20;     C.showText "Current notes:"
+    C.moveTo 270 20;    C.showText "Current chord:"
+    C.moveTo 550 20;    C.showText "Current scale:"
+    C.moveTo 10 330;    C.showText "All chords with these notes:"
 
     C.setFontSize 20
     C.moveTo 10 50;     C.showText $ niceList 12 (map show currentNotes)
@@ -132,5 +132,5 @@ renderCanvas (currentNotes, historyNotes) = do
     C.translate 270 0;  renderCOF (grayCOF currentNotes) (250, 250)
     C.translate 270 0;  renderKeyboard (grayDistributionKeyboard historyNotes) (250, 180)
 
-    where niceList n lst = concat (L.intersperse " " (take n lst))
+    where niceList n lst = unwords (take n lst)
 

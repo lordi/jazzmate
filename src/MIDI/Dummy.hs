@@ -20,17 +20,17 @@ run = do ch <- newChan
          forkIO $ forever (sendMIDIsequence (writeChan ch))
          return ch
 
-keyon chan vel key = (Msg.Channel (ChannelMsg.Cons chan voice))
+keyon chan vel key = Msg.Channel (ChannelMsg.Cons chan voice)
     where voice = ChannelMsg.Voice (VoiceMsg.NoteOn pitch vel)
           pitch = toPitch key
 
-keyoff chan vel key = (Msg.Channel (ChannelMsg.Cons chan voice))
+keyoff chan vel key = Msg.Channel (ChannelMsg.Cons chan voice)
     where voice = ChannelMsg.Voice (VoiceMsg.NoteOff pitch vel)
           pitch = toPitch key
 
 pick :: [a] -> IO a
 pick xs = do
-    r <- randomRIO (0, (length xs - 1))
+    r <- randomRIO (0, length xs - 1)
     return $ xs !! r
 
 sendMIDIsequence send = do

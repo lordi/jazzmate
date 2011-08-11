@@ -11,6 +11,6 @@ run = do ch <- newChan
          forkIO $ MIDI.main (writeMsg ch)
          return ch
 
-writeMsg :: (Chan Msg.T) -> NFrames -> (NFrames, Msg.T) -> IO (NFrames, Msg.T)
+writeMsg :: Chan Msg.T -> NFrames -> (NFrames, Msg.T) -> IO (NFrames, Msg.T)
 writeMsg ch _ (tf@(NFrames t), e) = do writeChan ch e; return (tf, e)
 

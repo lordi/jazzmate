@@ -25,8 +25,8 @@ toMsg e = case (Event.body e) of
         Event.NoteEv Event.NoteOff n -> Just $ channelMsg V.NoteOff (Event.noteNote n) (Event.noteVelocity n)
         _ -> Nothing
         where channelMsg ev note vel = Msg.Channel Cons {
-            Channel.messageChannel = (toChannel 1), 
-            messageBody = (Voice (ev (toPitch note) (toVelocity vel)))
+            Channel.messageChannel = toChannel 1, 
+            messageBody = Voice (ev (toPitch note) (toVelocity vel))
         }
 
 run :: IO (Chan Msg.T)

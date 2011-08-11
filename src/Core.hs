@@ -28,7 +28,7 @@ chordsWithExactNotes :: [Note] -> [Chord]
 chordsWithExactNotes ns =
     [ chord |
         chord <- chordsWithNotes ns,
-        null $ (notes chord) L.\\ ns]
+        null $ notes chord L.\\ ns]
 
 scalesWithNotes :: [Note] -> [Scale]
 scalesWithNotes ns =
@@ -36,14 +36,14 @@ scalesWithNotes ns =
         n <- [minBound..],
         t <- [minBound..],
         let scale = Scale n t,
-        all (flip elem (notes scale)) ns && (null $ (notes scale) L.\\ ns)]
+        all (`elem` notes scale) ns && null (notes scale L.\\ ns)]
 
 histogram :: Ord a => [a] -> M.Map a Int
 histogram xs = M.fromList [ (head l, length l) | l <- L.group (L.sort xs) ]
 
 -- | Converts a MIDI pitch to a Note as defined in MusicTheory
 fromPitch :: V.Pitch -> Note
-fromPitch p = toEnum ((V.fromPitch p) `mod` (fromEnum PerfectOctave))-- octave)
+fromPitch p = toEnum (V.fromPitch p `mod` fromEnum PerfectOctave)
 
 toPitch :: Note -> V.Pitch
 toPitch k = V.toPitch (fromEnum k)
