@@ -36,7 +36,7 @@ pick xs = do
 sendMIDIsequence send = do
                         let chan   = ChannelMsg.toChannel 3
                             vel    = VoiceMsg.toVelocity 64
-                            secs s = s * 1000000
+                            secs s = s * 100000
                             on key = do threadDelay (secs 1); send $ keyon chan vel key; return ()
                             off key = do send $ keyoff chan vel key; return ()
                         key <- pick [minBound .. maxBound]

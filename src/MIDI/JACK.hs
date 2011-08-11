@@ -1,4 +1,4 @@
-module MIDI.JackBridge where
+module MIDI.JACK where
 
 import Control.Concurrent
 import Control.Concurrent.Chan
