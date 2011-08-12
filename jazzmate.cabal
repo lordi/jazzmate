@@ -8,7 +8,24 @@ Maintainer:          hgraeule@uos.de
 Build-Type:          Simple
 Cabal-Version:       >=1.2
 
+Flag JACK
+  Description:       Enable JACK support (requires jack bindings 0.6)
+  Default:           False
+
+Flag ALSA
+  Description:       Enable ALSA support
+  Default:           True
+
 Executable jazzmate
   Main-is:           Main.hs
   Hs-Source-Dirs:    src
-  Build-Depends:     base >= 3 && < 5, containers, mtl, haskell98, midi, midi-alsa, jack >= 0.6, gtk, cairo, colour, midi-alsa, alsa-seq, alsa-core
+  Extensions:        CPP
+  Build-Depends:     base >= 3 && < 5, containers, mtl, haskell98, midi, gtk, cairo, colour
+
+  if flag(ALSA)
+    Cpp-Options:     -DUSE_ALSA
+    Build-Depends:   alsa-seq, alsa-core, midi-alsa
+
+  if flag(jack)
+    Cpp-Options:     -DUSE_JACK
+    Build-Depends:   jack >= 0.6

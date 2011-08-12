@@ -16,13 +16,13 @@ Screenshot (work in progress)
 Code structure
 --------------
 
-The program is written in Haskell and interfaces with the JACK audio daemon to
-receive MIDI input. This happens in the MIDI.JackBridge module by creating a
-Chan and subsequently feeding MIDI messages to it.
+The program is written in Haskell and interfaces with ALSA or the JACK audio
+daemon to receive MIDI input. These MIDI clients can be found in the MIDI
+folder. MIDI messages will be send to a Control.Concurrent.Chan.
 
-The Main module is responsible to collect the notes from the Chan and store
-them in a state variable. It creates a GTK window and uses Cairo to render a
-display of the pressed notes.
+The GUI.Main module is responsible to collect the notes from the Chan and
+store them in a state variable. It creates a GTK window and uses Cairo to
+render a display of the pressed notes.
 
 Last but not least, the core of the program consists of purely functional code
 to juggle with notes, scales and chords. To do that, I incorporate a nice and
@@ -34,7 +34,16 @@ Requirements
 ------------
 
  * MIDI keyboard
- * Bindings to the JACK Audio Connection Kit for Haskell (Jack 0.6). As of
-   June 2011, you have to use the darcs version at
-   http://code.haskell.org/jack/, since Hackage only provides 0.5.
+ * ALSA or JACK Haskell bindings to receive MIDI Input
  * Further Haskell dependencies: midi, gtk, cairo, colour
+
+JACK support
+------------
+
+By default, JACK support is not enabled because Hackage only provides the
+legacy 0.5 version of the Haskell bindings. As of June 2011, in order to use
+JACK, you have to use the darcs version at http://code.haskell.org/jack/.
+
+Then you can configure JazzMate as follows:
+
+ cabal configure -f jack
