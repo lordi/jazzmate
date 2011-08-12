@@ -3,7 +3,14 @@ module GUI.Main where
 import qualified Data.List as L
 import Control.Monad.State
 import Control.Concurrent
+import Control.Concurrent.STM.TChan
 import Graphics.UI.Gtk
+import Control.Monad.State
+import Control.Concurrent
+import Control.Concurrent.Chan
+import Control.Concurrent.STM.TChan
+import Control.Monad.STM
+
 
 import qualified Sound.MIDI.Message as Msg
 import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
@@ -32,8 +39,8 @@ record _ = id
 
 -- | For every message that is read from the Chan, the state that is stored
 -- in the MVar stvar is updated.
-updateState ch stvar = do
-    msg <- readChan ch
+waitAndUpdateState noteCh stvar = do
+    msg <- atomically $ readTChan noteCh
     modifyMVar_ stvar $ return . (\(c, h) -> (transform msg c, record msg h))
     (_,history) <- readMVar stvar
     putStrLn (show (histogram history))
@@ -49,8 +56,10 @@ invalidate win = do
 
 -- | Main function. Create a GTK window with a drawing window, fire up the
 -- MIDI bridge and register the expose rendering handler.
-main midi = do
+main midiProvider = do
     stvar <- newMVar ([], [])
+    noteCh <- newTChanIO
+
     initGUI
     window <- windowNew
     canvas <- drawingAreaNew
@@ -61,8 +70,10 @@ main midi = do
                               drawing <- widgetGetDrawWindow canvas
                               renderWithDrawable drawing $ renderCanvas state
                               return True)
-    ch <- midi
-    forkIO $ forever (updateState ch stvar >> (invalidate canvas))
+
+    forkIO $ forever (waitAndUpdateState noteCh stvar >> (invalidate canvas))
+    forkIO $ midiProvider noteCh
+
     widgetShowAll window
     mainGUI
 

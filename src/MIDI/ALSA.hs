@@ -1,12 +1,12 @@
 module MIDI.ALSA where
 
-import Control.Concurrent
-import Control.Concurrent.Chan
+import Control.Concurrent.STM.TChan
+import Control.Monad.STM
+
 import qualified Sound.MIDI.Message as Msg
 import qualified Sound.MIDI.Message.Channel as Channel
 import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
 import qualified Sound.MIDI.Message.Channel.Voice as V
-
 
 import qualified Sound.ALSA.Sequencer.Client as Client
 import qualified Sound.ALSA.Sequencer.Port as Port
@@ -29,18 +29,13 @@ toMsg e = case (Event.body e) of
             messageBody = Voice (ev (toPitch note) (toVelocity vel))
         }
 
-run :: IO (Chan Msg.T)
-run = do
-  ch <- newChan
-  _ <- forkIO $ setup $ writeChan ch
-  return ch
-
-setup :: (Msg.T -> IO ()) -> IO ()
-setup send = (do
+run :: TChan Msg.T -> IO ()
+run noteChan = (do
   SndSeq.with SndSeq.defaultName SndSeq.Block $ \h -> do
   Client.setName (h :: SndSeq.T SndSeq.InputMode) "JazzMate"
   Port.withSimple h "Input"
      (Port.caps [Port.capWrite, Port.capSubsWrite]) Port.typeMidiGeneric $ \ _p1 -> do
-  forever $ do event <- Event.input h; maybe (return ()) send (toMsg event)
+  forever $ do event <- Event.input h; maybeSend (toMsg event)
   ) `AlsaExc.catch` \e -> putStrLn $ "ALSA Exception: " ++ AlsaExc.show e
+  where maybeSend = maybe (return ()) (atomically . writeTChan noteChan)
 
