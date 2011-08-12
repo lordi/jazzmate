@@ -38,7 +38,7 @@ run = do
 setup :: (Msg.T -> IO ()) -> IO ()
 setup send = (do
   SndSeq.with SndSeq.defaultName SndSeq.Block $ \h -> do
-  Client.setName (h :: SndSeq.T SndSeq.InputMode) "scalesh"
+  Client.setName (h :: SndSeq.T SndSeq.InputMode) "JazzMate"
   Port.withSimple h "Input"
      (Port.caps [Port.capWrite, Port.capSubsWrite]) Port.typeMidiGeneric $ \ _p1 -> do
   forever $ do event <- Event.input h; maybe (return ()) send (toMsg event)
