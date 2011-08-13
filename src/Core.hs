@@ -1,6 +1,6 @@
 module Core (module MusicTheory, blackNotes, chordsWithNotes,
     chordsWithExactNotes, toPitch, fromPitch, noteToCOFAngle,
-    scalesWithNotes, histogram) where
+    scalesWithNotes, guessScales) where
 
 import Data.Maybe
 import qualified Data.List as L
@@ -38,10 +38,18 @@ scalesWithNotes ns =
         let scale = Scale n t,
         all (`elem` notes scale) ns && null (notes scale L.\\ ns)]
 
-histogram :: Ord a => [a] -> M.Map a Int
-histogram xs = M.fromList [ (head l, length l) | l <- L.group (L.sort xs) ]
+guessScales :: [Note] -> [Scale]
+guessScales ns = scalesWithNotes mostFrequentlyPlayedNotes
+                 where mostFrequentlyPlayedNotes = snd (foldUntil enough aggregate (0, []) $ sortedHistogram ns)
+                       foldUntil crit act = foldl (\x y -> if crit x then x else act x y)
+                       aggregate (s, notes) (cnt, n) = (s + cnt, n : notes)
+                       enough (s, _) = s >= (length ns - 5)
 
--- | Converts a MIDI pitch to a Note as defined in MusicTheory
+sortedHistogram :: [Note] -> [(Int, Note)]
+sortedHistogram xs = L.sortBy compareFst [ (length l, head l) | l <- L.group (L.sort xs) ]
+                    where compareFst (f1,_) (f2,_) = compare f2 f1
+
+-- | Converts a Pitch to a Note as defined in MusicTheory
 fromPitch :: V.Pitch -> Note
 fromPitch p = toEnum (V.fromPitch p `mod` fromEnum PerfectOctave)
 

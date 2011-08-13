@@ -125,12 +125,13 @@ renderCanvas (currentNotes, historyNotes) = do
     C.setFontSize 20
     C.moveTo 10 50;     C.showText $ niceList 12 (map show currentNotes)
     C.moveTo 270 50;    C.showText $ niceList 1 (map show (chordsWithExactNotes currentNotes))
-    C.moveTo 550 50;    C.showText $ niceList 1 (map show (scalesWithNotes historyNotes))
+    C.moveTo 550 50;    C.showText $ niceList 3 (map show scales)
     C.moveTo 10 360;    C.showText $ niceList 10 (map show (chordsWithNotes currentNotes))
 
     C.translate 10 70;  renderKeyboard (grayKeyboard currentNotes) (250, 180)
     C.translate 270 0;  renderCOF (grayCOF currentNotes) (250, 250)
-    C.translate 270 0;  renderKeyboard (grayDistributionKeyboard historyNotes) (250, 180)
+    C.translate 270 0;  renderKeyboard (grayKeyboard (M.maybe [] notes $ M.listToMaybe scales)) (250, 180)
 
     where niceList n lst = unwords (take n lst)
+          scales = guessScales historyNotes
 

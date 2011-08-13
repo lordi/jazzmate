@@ -1,15 +1,13 @@
 module GUI.Main where
 
 import qualified Data.List as L
-import Control.Monad.State
-import Control.Concurrent
-import Control.Concurrent.STM.TChan
+
 import Graphics.UI.Gtk
-import Control.Monad.State
+
 import Control.Concurrent
-import Control.Concurrent.Chan
 import Control.Concurrent.STM.TChan
 import Control.Monad.STM
+import Control.Monad.State
 
 
 import qualified Sound.MIDI.Message as Msg
@@ -19,7 +17,7 @@ import qualified Sound.MIDI.Message.Channel.Voice as V
 import Core
 import GUI.Render (renderCanvas)
 
-historyLength = 40
+historyLength = 80
 
 -- | The core of this module's functionality: Take a MIDI message and a list
 -- of keys, and return the resulting list. Pressing a key will add the
@@ -42,8 +40,8 @@ record _ = id
 waitAndUpdateState noteCh stvar = do
     msg <- atomically $ readTChan noteCh
     modifyMVar_ stvar $ return . (\(c, h) -> (transform msg c, record msg h))
-    (_,history) <- readMVar stvar
-    putStrLn (show (histogram history))
+    --(_,history) <- readMVar stvar
+    --putStrLn (show (guessScales history))
 
 -- | Invalidate a widget so that the expose event will be fired. This causes
 -- the widget to get redrawn.

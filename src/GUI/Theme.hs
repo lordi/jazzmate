@@ -19,10 +19,10 @@ grayKeyboard pressedNotes n
     | n `elem` blackNotes   = RGB 0.0 0.0 0.0
     | otherwise             = RGB 1.0 1.0 1.0
 
-grayDistributionKeyboard :: [Note] -> Note -> RGB Double
-grayDistributionKeyboard pressedNotes n
-    | otherwise             = RGB s 1.0 s
-    where s = 1 / (1 + (fromIntegral $ M.findWithDefault 0 n (histogram pressedNotes)))
+--grayDistributionKeyboard :: [Note] -> Note -> RGB Double
+--grayDistributionKeyboard pressedNotes n
+--    | otherwise             = RGB s 1.0 s
+--    where s = 1 / (1 + (fromIntegral $ M.findWithDefault 0 n (histogram pressedNotes)))
 
 
 grayCOF :: [Note] -> Note -> Bool -> RGB Double
