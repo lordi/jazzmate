@@ -1,4 +1,4 @@
-module MIDI.JACK where
+module MIDI.JACK (run, ) where
 
 import Control.Concurrent.STM.TChan
 import Control.Monad.STM

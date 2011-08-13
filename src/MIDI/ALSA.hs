@@ -1,4 +1,4 @@
-module MIDI.ALSA where
+module MIDI.ALSA (run, ) where
 
 import Control.Concurrent.STM.TChan
 import Control.Monad.STM
@@ -9,9 +9,9 @@ import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
 import qualified Sound.MIDI.Message.Channel.Voice as V
 
 import qualified Sound.ALSA.Sequencer.Client as Client
-import qualified Sound.ALSA.Sequencer.Port as Port
-import qualified Sound.ALSA.Sequencer.Event as Event
-import qualified Sound.ALSA.Sequencer as SndSeq
+import qualified Sound.ALSA.Sequencer.Port as P
+import qualified Sound.ALSA.Sequencer.Event as E
+import qualified Sound.ALSA.Sequencer as Seq
 import qualified Sound.ALSA.Exception as AlsaExc
 import Sound.MIDI.ALSA
 import Control.Monad (forever, void, )
@@ -19,23 +19,23 @@ import Control.Monad (forever, void, )
 -- | Provides a mapping from a Sound.ALSA.Sequencer.Event to a
 -- Sound.MIDI.Message.Msg by converting only the relevant parts
 -- (NoteOn/NoteOff).
-toMsg :: Event.T -> Maybe Msg.T
-toMsg e = case (Event.body e) of
-        Event.NoteEv Event.NoteOn n -> Just $ channelMsg V.NoteOn (Event.noteNote n) (Event.noteVelocity n)
-        Event.NoteEv Event.NoteOff n -> Just $ channelMsg V.NoteOff (Event.noteNote n) (Event.noteVelocity n)
-        _ -> Nothing
-        where channelMsg ev note vel = Msg.Channel Cons {
-            Channel.messageChannel = toChannel 1, 
-            messageBody = Voice (ev (toPitch note) (toVelocity vel))
-        }
+toMsg :: E.T -> Maybe Msg.T
+toMsg e = case E.body e of
+  E.NoteEv E.NoteOn n -> Just $ msg V.NoteOn (E.noteNote n) (E.noteVelocity n)
+  E.NoteEv E.NoteOff n -> Just $ msg V.NoteOff (E.noteNote n) (E.noteVelocity n)
+  _ -> Nothing
+  where msg ev note vel = Msg.Channel Cons {
+      Channel.messageChannel = toChannel 1,
+      messageBody = Voice (ev (toPitch note) (toVelocity vel))
+  }
 
+-- | The main ALSA MIDI code. TODO doc
 run :: TChan Msg.T -> IO ()
-run noteChan = (do
-  SndSeq.with SndSeq.defaultName SndSeq.Block $ \h -> do
-  Client.setName (h :: SndSeq.T SndSeq.InputMode) "JazzMate"
-  Port.withSimple h "Input"
-     (Port.caps [Port.capWrite, Port.capSubsWrite]) Port.typeMidiGeneric $ \ _p1 -> do
-  forever $ do event <- Event.input h; maybeSend (toMsg event)
+run noteChan = 
+  Seq.with Seq.defaultName Seq.Block (\h -> do
+    Client.setName (h :: Seq.T Seq.InputMode) "JazzMate"
+    P.withSimple h "Input" (P.caps [P.capWrite, P.capSubsWrite]) P.typeMidiGeneric $ \_ ->
+      forever $ do event <- E.input h; maybeSend (toMsg event)
   ) `AlsaExc.catch` \e -> putStrLn $ "ALSA Exception: " ++ AlsaExc.show e
   where maybeSend = maybe (return ()) (atomically . writeTChan noteChan)
 

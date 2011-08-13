@@ -1,4 +1,4 @@
-module MIDI.Dummy where
+module MIDI.Dummy (run, ) where
 
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -33,15 +33,15 @@ pick xs = do
     return $ xs !! r
 
 sendRandomChord ch = do
-    let chan   = ChannelMsg.toChannel 1
-        vel    = VoiceMsg.toVelocity 64
-        secs s = s * 100000
-        on key = do threadDelay (secs 1); send $ keyon chan vel key; return ()
-        off key = do send $ keyoff chan vel key; return ()
-        send = atomically . writeTChan ch
+    let chan    = ChannelMsg.toChannel 1
+        vel     = VoiceMsg.toVelocity 64
+        on n    = do wait 1; send $ keyon chan vel n; return ()
+        off n   = do send $ keyoff chan vel n; return ()
+        send    = atomically . writeTChan ch
+        wait s  = threadDelay (s * 100000)
     key <- pick [minBound .. maxBound]
-    ctype <- pick [minBound .. maxBound]
-    mapM on $ notes (Chord ctype key)
-    threadDelay (secs 2)
-    mapM off $ notes (Chord ctype key)
+    chordType <- pick [minBound .. maxBound]
+    mapM_ on $ notes (Chord chordType key)
+    wait 2
+    mapM_ off $ notes (Chord chordType key)
 
