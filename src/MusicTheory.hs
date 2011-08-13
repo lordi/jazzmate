@@ -1,4 +1,5 @@
--- |Western Music Theory, taken from https://music-theory.googlecode.com/
+-- | Western Music Theory
+-- Originally from https://music-theory.googlecode.com/
 module MusicTheory where
 
 import Data.List
@@ -98,10 +99,10 @@ sIntervals MinorHarmonic =
 sIntervals MinorMelodic =
 	[PerfectUnison, MajorSecond, MinorThird, PerfectFourth, PerfectFifth,
          MajorSixth, MajorSeventh]
-sIntervals WholeTone = take 6 . iterate (flip add MajorSecond)
-sIntervals Chromatic = take 12 . iterate (flip add MinorSecond)
+sIntervals WholeTone = take 6 $ iterate (flip add MajorSecond) PerfectUnison
+sIntervals Chromatic = take 12 $ iterate (flip add MinorSecond) PerfectUnison
 -- Ionian is the same as MajorDiatonic. The rest of the scales (Dorian to
--- Locrian) can be specified in relation to its predecessor 
+-- Locrian) can be specified in relation to its predecessor. TODO: verify
 sIntervals Ionian = sIntervals MajorDiatonic
 sIntervals x = map diminish $ sIntervals (add x (-1))
 
