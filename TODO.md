@@ -17,4 +17,4 @@ Some further ideas to implement
 * ~~clean up Core.hs (maybe use https://music-theory.googlecode.com/svn-history/r18/trunk/MusicTheory.hs which appears to be very similar yet much cleaner)~~
 * GTK dropdown box for MIDI input / split key
 * add chromatic, whole tone, melodic and harmonic minor scales to MusicTheory
-* add Show instance for Scale
+* ~~add Show instance for Scale~~

@@ -29,7 +29,7 @@ data ScaleType =
     deriving (Eq, Bounded, Enum, Show)
 
 data Chord = Chord Note ChordType deriving (Eq)
-data Scale = Scale Note ScaleType deriving (Show)
+data Scale = Scale Note ScaleType deriving (Eq)
 
 data DiatonicInterval =
       PerfectUnison
@@ -187,6 +187,9 @@ instance Show ChordType where
 
 instance Show Chord where
     show (Chord note chordType) = show note ++ show chordType
+
+instance Show Scale where
+    show (Scale note scaleType) = show note ++ " " ++ show scaleType
 
 instance Read Chord where
     readsPrec d s =
