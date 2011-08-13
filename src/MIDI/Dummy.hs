@@ -3,8 +3,9 @@ module MIDI.Dummy where
 import qualified Data.Map as M
 import qualified Data.Set as S
 
-import Control.Monad.State
+import Control.Concurrent
 import Control.Concurrent.STM.TChan
+import Control.Monad
 import Control.Monad.STM
 
 import qualified Sound.MIDI.Message as Msg
