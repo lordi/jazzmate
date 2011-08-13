@@ -25,7 +25,18 @@ data ScaleType =
       MajorPentatonic
     | MinorPentatonic
     | MajorDiatonic
-    | MinorDiatonic
+    | MinorDiatonic -- also known as MinorNatural
+    | MinorHarmonic
+    | MinorMelodic
+    | Chromatic
+    | WholeTone
+    | Ionian        -- same as MajorDiatonic
+    | Dorian
+    | Phrygian
+    | Lydian
+    | Mixolydian
+    | Aeolian       -- same as MinorDiatonic
+    | Locrian
     deriving (Eq, Bounded, Enum, Show)
 
 data Chord = Chord Note ChordType deriving (Eq)
@@ -81,6 +92,18 @@ sIntervals MajorDiatonic =
 sIntervals MinorDiatonic =
 	[PerfectUnison, MajorSecond, MinorThird, PerfectFourth, PerfectFifth,
          MinorSixth, MinorSeventh]
+sIntervals MinorHarmonic =
+	[PerfectUnison, MajorSecond, MinorThird, PerfectFourth, PerfectFifth,
+         MinorSixth, MajorSeventh]
+sIntervals MinorMelodic =
+	[PerfectUnison, MajorSecond, MinorThird, PerfectFourth, PerfectFifth,
+         MajorSixth, MajorSeventh]
+sIntervals WholeTone = take 6 . iterate (flip add MajorSecond)
+sIntervals Chromatic = take 12 . iterate (flip add MinorSecond)
+-- Ionian is the same as MajorDiatonic. The rest of the scales (Dorian to
+-- Locrian) can be specified in relation to its predecessor 
+sIntervals Ionian = sIntervals MajorDiatonic
+sIntervals x = map diminish $ sIntervals (add x (-1))
 
 circleOfFifths :: Note -> [Note]
 circleOfFifths note = iterate (flip add PerfectFifth) note

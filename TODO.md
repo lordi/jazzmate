@@ -16,5 +16,6 @@ Some further ideas to implement
   coloring can be turned of easily (in case its annoying)~~
 * ~~clean up Core.hs (maybe use https://music-theory.googlecode.com/svn-history/r18/trunk/MusicTheory.hs which appears to be very similar yet much cleaner)~~
 * GTK dropdown box for MIDI input / split key
-* add chromatic, whole tone, melodic and harmonic minor scales to MusicTheory
+* ~~add chromatic, whole tone, melodic and harmonic minor scales to MusicTheory~~
 * ~~add Show instance for Scale~~
+* History state can directly be stored in a histogram
