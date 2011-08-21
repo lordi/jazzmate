@@ -1,5 +1,5 @@
-JazzMate - Scale and Chord Utility for Piano Players
-===================================================
+JazzMate - Live Scale and Chord Utility for Piano Players
+=========================================================
 
 For a given combination of pressed notes on a MIDI keyboard, jazzmate will
 print out all matching chords' names, as well as a Cairo rendering of a keyboard layout, highlighting the keys in question. Furthermore it displays the [circle of fifths](http://en.wikipedia.org/wiki/Circle_of_fifths), so that the chords' relationships can be easily identified.
