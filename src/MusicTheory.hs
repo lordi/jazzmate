@@ -38,7 +38,7 @@ data ScaleType =
     | Mixolydian
     | Aeolian       -- same as MinorDiatonic
     | Locrian
-    deriving (Eq, Bounded, Enum, Show)
+    deriving (Eq, Bounded, Enum, Show, Read)
 
 data Chord = Chord Note ChordType deriving (Eq)
 data Scale = Scale Note ScaleType deriving (Eq)

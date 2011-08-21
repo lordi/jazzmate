@@ -39,8 +39,8 @@ record _ = id
 waitAndUpdateState noteCh stvar = do
     msg <- atomically $ readTChan noteCh
     modifyMVar_ stvar $ return . (\(c, h) -> (transform msg c, record msg h))
-    (_,history) <- readMVar stvar
-    putStrLn (show (guessScales history))
+    -- (_,history) <- readMVar stvar
+    -- putStrLn (show (guessScales history))
 
 -- | Invalidate a widget so that the expose event will be fired. This causes
 -- the widget to get redrawn.
