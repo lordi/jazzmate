@@ -13,6 +13,20 @@ Screenshot (work in progress)
 
 ~~As you can see in the above screenshot, the application utilizes a synaesthetic approach to help the user learn chords and their relationships: A color wheel is mapped onto the circle of fifths to aid the intuitive learning, and the chord's color is also used on the piano display on the left.~~
 
+Usage
+-----
+
+If you are using the ALSA MIDI provider, you can simply start JazzMate by typing:
+
+> jazzmate -d alsa
+
+Then connect your MIDI keyboard to JazzMate via aconnect, patchage or qjackctl and starting jamming!
+
+The current scale
+-----------------
+
+TODO
+
 Code structure
 --------------
 
@@ -27,7 +41,7 @@ render a display of the pressed notes.
 Last but not least, the core of the program consists of purely functional code
 to juggle with notes, scales and chords. To do that, I incorporate a nice and
 clean Haskell module called MusicTheory (also available 
-[here](https://music-theory.googlecode.com/)) that implements a great deal of 
+[here](https://music-theory.googlecode.com/)) that implements a great deal of
 western music theory. Whenever needed, this is extended in the Core module.
 
 Requirements
@@ -46,4 +60,4 @@ JACK, you have to use the darcs version at http://code.haskell.org/jack/.
 
 Then you can configure JazzMate as follows:
 
- cabal configure -f jack
+> cabal configure -f jack
