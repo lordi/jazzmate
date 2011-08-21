@@ -12,49 +12,39 @@ import Core
 majorChordTypes = [Major, Major7th, Dominant7th]
 minorChordTypes = [Minor, Minor7th]
 
+type Color = RGB Double
+
+yellow = RGB 0.9 0.9 0.2
+black = RGB 0.0 0.0 0.0
+white = RGB 1.0 1.0 1.0
+lightBlue =  RGB 0.75 0.75 0.85
+lighterBlue = RGB 0.85 0.85 0.95
+
+blueAndYellowPressedNotes = mkKeyboardColoring yellow
+blueAndYellowCOF = mkCOFColoring yellow lighterBlue lightBlue
+blueAndYellowScaleNotes = mkKeyboardColoring lightBlue
+
 -- Boring gray theme
-grayKeyboard :: [Note] -> Note -> RGB Double
-grayKeyboard pressedNotes n
-    | n `elem` pressedNotes = RGB 0.5 0.5 0.5
-    | n `elem` blackNotes   = RGB 0.0 0.0 0.0
-    | otherwise             = RGB 1.0 1.0 1.0
+mkKeyboardColoring :: Color 
+                    -> [Note] -> Note -> Color
+mkKeyboardColoring pressedColor pressedNotes n
+    | n `elem` pressedNotes = pressedColor
+    | n `elem` blackNotes   = black
+    | otherwise             = white
 
---grayDistributionKeyboard :: [Note] -> Note -> RGB Double
---grayDistributionKeyboard pressedNotes n
---    | otherwise             = RGB s 1.0 s
---    where s = 1 / (1 + (fromIntegral $ M.findWithDefault 0 n (histogram pressedNotes)))
-
-
-grayCOF :: [Note] -> Maybe Scale -> Note -> Bool -> RGB Double
-grayCOF pressedNotes currentScale note isMajor
-    | any (`elem` chords) reprchords    = RGB 0.5 0.5 0.5
-    | isJust currentScale && any (inScale (fromJust currentScale)) reprchords = RGB 1.0 1.0 0.2
-    | otherwise                         = RGB 1.0 1.0 1.0
+mkCOFColoring :: Color -> Color -> Color
+                -> [Note] -> Maybe Scale -> Note -> Bool -> Color
+mkCOFColoring currentChordColor resolvingChordColor chordInScaleColor
+                pressedNotes currentScale note isMajor
+    | any (`elem` chords) reprchords            = currentChordColor
+    | any (`elem` resolvingChords) reprchords   = resolvingChordColor
+    | isJust currentScale && any (inScale (fromJust currentScale)) reprchords = chordInScaleColor
+    | otherwise                                 = white
     where
         chords = chordsWithExactNotes pressedNotes
+        chord = listToMaybe chords
         reprchords = map (\ch -> (Chord note ch)) types
         types = if isMajor then majorChordTypes else minorChordTypes
+        resolvingChords = maybe [] (\scale -> maybe [] ((flip resolvesChord) scale) chord) currentScale
 
--- Colorful rainbow theme
-{-
-rainbowNoteboard :: [Note] -> Note -> RGB Double
-rainbowNoteboard pressedNotes n
-    | n `elem` pressedNotes = chordsToCOFColor chords
-    | n `elem` blackNotes   = RGB 0.0 0.0 0.0
-    | otherwise             = RGB 1.0 1.0 1.0
-    where
-        chords = chordsWithNotes pressedNotes
 
-rainbowCOF :: [Note] -> Note -> Bool -> RGB Double
-rainbowCOF pressedNotes note isMajor
-    | (note, Just isMajor) `elem` chords    = chordsToCOFColor [(note, Just isMajor)]
-    | otherwise                             = dampen $ chordsToCOFColor [(note, Just isMajor)]
-    where
-        chords = chordsWithNotes pressedNotes
-        dampen r = hsv (hue r) 0.25 (value r)
-
-chordsToCOFColor ((note, Just isMajor):_)
-                | isMajor       = hsv (noteToCOFAngle note) 1.0 0.95
-                | otherwise     = hsv (noteToCOFAngle (note `up` minor_third)) 1.0 0.8
-chordsToCOFColor _ = RGB 0.5 0.5 0.5
--}

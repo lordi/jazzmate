@@ -120,7 +120,7 @@ renderCanvas currentScale (currentNotes, historyNotes) = do
     C.moveTo 10 20;     C.showText "Current notes:"
     C.moveTo 270 20;    C.showText "Current chord:"
     C.moveTo 550 20;    C.showText "Current scale:"
-    C.moveTo 10 80;    C.showText "Chords containing these notes:"
+    C.moveTo 10 80;     C.showText "Chords containing these notes:"
     C.moveTo 270 80;    C.showText "Chords resolving current chord:"
 
     C.setFontSize 20
@@ -130,11 +130,11 @@ renderCanvas currentScale (currentNotes, historyNotes) = do
 
     C.setFontSize 14
     C.moveTo 10 107;    C.showText $ niceList 5 (map show (chordsWithNotes currentNotes))
-    C.moveTo 270 107;    C.showText $ niceList 8 (map show $ resolves currentChord)
+    C.moveTo 270 107;   C.showText $ niceList 8 (map show $ resolves currentChord)
 
-    C.translate 10 130;  renderKeyboard (grayKeyboard currentNotes) (250, 180)
-    C.translate 270 0;  renderCOF (grayCOF currentNotes currentScale) (250, 250)
-    C.translate 270 0;  renderKeyboard (grayKeyboard (M.maybe [] notes currentScale)) (250, 180)
+    C.translate 10 130; renderKeyboard (blueAndYellowPressedNotes currentNotes) (250, 180)
+    C.translate 270 0;  renderCOF (blueAndYellowCOF currentNotes currentScale) (250, 250)
+    C.translate 270 0;  renderKeyboard (blueAndYellowScaleNotes (M.maybe [] notes currentScale)) (250, 180)
 
     where niceList n lst = unwords (take n lst)
           currentChord = M.listToMaybe (chordsWithExactNotes currentNotes)
