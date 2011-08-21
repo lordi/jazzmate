@@ -25,9 +25,10 @@ grayKeyboard pressedNotes n
 --    where s = 1 / (1 + (fromIntegral $ M.findWithDefault 0 n (histogram pressedNotes)))
 
 
-grayCOF :: [Note] -> Note -> Bool -> RGB Double
-grayCOF pressedNotes note isMajor
+grayCOF :: [Note] -> Maybe Scale -> Note -> Bool -> RGB Double
+grayCOF pressedNotes currentScale note isMajor
     | any (`elem` chords) reprchords    = RGB 0.5 0.5 0.5
+    | isJust currentScale && any (inScale (fromJust currentScale)) reprchords = RGB 1.0 1.0 0.2
     | otherwise                         = RGB 1.0 1.0 1.0
     where
         chords = chordsWithExactNotes pressedNotes

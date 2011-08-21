@@ -15,7 +15,7 @@ Some further ideas to implement
 * ~~ability to give the render function custom color functions so that the
   coloring can be turned of easily (in case its annoying)~~
 * ~~clean up Core.hs (maybe use https://music-theory.googlecode.com/svn-history/r18/trunk/MusicTheory.hs which appears to be very similar yet much cleaner)~~
-* GTK dropdown box for MIDI input / split key
+* ~~GTK dropdown box for MIDI input / split key~~ dismissed, by design the programs only input should be midi
 * ~~add chromatic, whole tone, melodic and harmonic minor scales to MusicTheory~~
 * ~~add Show instance for Scale~~
-* History state can directly be stored in a histogram
+* Can the current key and mode/scale be guessed solidly by the last n notes that were played?
