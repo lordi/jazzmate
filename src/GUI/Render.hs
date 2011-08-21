@@ -120,18 +120,22 @@ renderCanvas currentScale (currentNotes, historyNotes) = do
     C.moveTo 10 20;     C.showText "Current notes:"
     C.moveTo 270 20;    C.showText "Current chord:"
     C.moveTo 550 20;    C.showText "Current scale:"
-    C.moveTo 10 330;    C.showText "All chords with these notes:"
+    C.moveTo 10 80;    C.showText "Chords containing these notes:"
+    C.moveTo 270 80;    C.showText "Chords resolving current chord:"
 
     C.setFontSize 20
     C.moveTo 10 50;     C.showText $ niceList 12 (map show currentNotes)
-    C.moveTo 270 50;    C.showText $ niceList 1 (map show (chordsWithExactNotes currentNotes))
+    C.moveTo 270 50;    C.showText $ M.maybe "" show currentChord
     C.moveTo 550 50;    C.showText $ show currentScale
-    C.moveTo 10 360;    C.showText $ niceList 10 (map show (chordsWithNotes currentNotes))
 
-    C.translate 10 70;  renderKeyboard (grayKeyboard currentNotes) (250, 180)
+    C.setFontSize 14
+    C.moveTo 10 107;    C.showText $ niceList 5 (map show (chordsWithNotes currentNotes))
+    C.moveTo 270 107;    C.showText $ niceList 8 (map show $ resolves currentChord)
+
+    C.translate 10 130;  renderKeyboard (grayKeyboard currentNotes) (250, 180)
     C.translate 270 0;  renderCOF (grayCOF currentNotes currentScale) (250, 250)
     C.translate 270 0;  renderKeyboard (grayKeyboard (M.maybe [] notes currentScale)) (250, 180)
 
     where niceList n lst = unwords (take n lst)
---          currentScale = M.listToMaybe (guessScales historyNotes)
-
+          currentChord = M.listToMaybe (chordsWithExactNotes currentNotes)
+          resolves ch = M.maybe [] (\scale -> M.maybe [] ((flip resolvesChord) scale) ch) currentScale

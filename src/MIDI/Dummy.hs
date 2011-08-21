@@ -38,7 +38,7 @@ sendRandomChord ch = do
         on n    = do wait 1; send $ keyon chan vel n; return ()
         off n   = do send $ keyoff chan vel n; return ()
         send    = atomically . writeTChan ch
-        wait s  = threadDelay (s * 100000)
+        wait s  = threadDelay (s * 1000000)
     key <- pick [minBound .. maxBound]
     chordType <- pick [minBound .. maxBound]
     mapM_ on $ notes (Chord chordType key)
