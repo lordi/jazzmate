@@ -19,3 +19,4 @@ Some further ideas to implement
 * ~~add chromatic, whole tone, melodic and harmonic minor scales to MusicTheory~~
 * ~~add Show instance for Scale~~
 * Can the current key and mode/scale be guessed solidly by the last n notes that were played?
+* Bug: Sometimes JazzMate freezes and does not update the main window anymore
