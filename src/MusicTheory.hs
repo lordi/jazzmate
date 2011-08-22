@@ -11,7 +11,7 @@ data Note = C | C' | D | D' | E | F | F' | G | G' | A | A' | B
     deriving (Enum, Bounded, Eq, Ord)
 
 data ScaleDegree = I | II | III | IV | V | VI | VII
-    deriving (Enum, Bounded, Eq, Ord)
+    deriving (Enum, Bounded, Eq, Ord, Show)
 
 data ChordType =
       Major
@@ -169,6 +169,10 @@ chordsAtScaleDegrees :: [ScaleDegree] -> Scale ->  [[Chord]]
 chordsAtScaleDegrees degrees scale  =
     map (\a -> filter (inScale scale) (chordsWithRoot a) )
         (notesAtScaleDegrees degrees scale)
+
+chordToScaleDegree :: Scale -> Chord -> Maybe ScaleDegree
+chordToScaleDegree scale chord = maybe Nothing (Just . toEnum) scaleDegreeIndex
+    where scaleDegreeIndex = findIndex (elem chord) (chordsAtScaleDegrees [minBound ..] scale)
 
 twelveBarBlues :: Scale -> [[Chord]]
 twelveBarBlues scale = chordsAtScaleDegrees [I,I,I,I,IV,IV,I,I,V,V,I,I] scale

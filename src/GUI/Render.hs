@@ -23,14 +23,17 @@ centerShowText s cx cy = do
 renderArc :: Double     -- Center x coordinate
             -> Double   -- Center y coordinate
             -> Note     -- Note in the Circle of Fifths
+            -> Maybe Scale
             -> (Note -> Bool -> RGB Double)
             -> C.Render ()
-renderArc cx cy key colorfunc = do
+renderArc cx cy key currentScale colorfunc = do
     let radians = (noteToCOFAngle key) * pi / 180.0 :: Double
         radiansL = (radians - (pi / 2) - 15 * pi / 180.0)
         radiansR = (radians - (pi / 2) + 15 * pi / 180.0)
         RGB majr majg majb = colorfunc key True
         RGB minr ming minb = colorfunc (key `add` MajorSixth) False
+        majdeg = M.maybe Nothing ((flip chordToScaleDegree) (Chord key Major)) currentScale
+        mindeg = M.maybe Nothing ((flip chordToScaleDegree) (Chord (key `add` MajorSixth) Minor)) currentScale
         arc min max = do
             C.newPath
             C.arc cx cy max radiansL radiansR
@@ -71,14 +74,19 @@ renderArc cx cy key colorfunc = do
     C.setFontSize 12
     uncurry (centerShowText $ show (key `add` MajorSixth) ++ "m") $ point (cx - 60) 0
 
+    C.setFontSize 10
+    uncurry (centerShowText (M.maybe "" show majdeg)) $ point (cx + 10) 0
+    uncurry (centerShowText (M.maybe "" show mindeg)) $ point (cx - 90) 0
+
+
 
 -- | Render Circle of Fifths
-renderCOF colorfunc (w, h) = do
+renderCOF currentScale colorfunc (w, h) = do
     let cx = realToFrac w / 2
         cy = realToFrac h / 2
     C.setLineCap C.LineCapRound
     C.setLineJoin C.LineJoinRound
-    foreach (take 12 $ circleOfFifths C) $ \ note -> renderArc cx cy note colorfunc
+    foreach (take 12 $ circleOfFifths C) $ \ note -> renderArc cx cy note currentScale colorfunc
 
 -- | First try to write a function that renders a piano on the screen. Still
 -- very ugly duckling, needs rewrite.
@@ -126,16 +134,18 @@ renderCanvas currentScale (currentNotes, historyNotes) = do
     C.setFontSize 20
     C.moveTo 10 50;     C.showText $ niceList 12 (map show currentNotes)
     C.moveTo 270 50;    C.showText $ M.maybe "" show currentChord
-    C.moveTo 550 50;    C.showText $ show currentScale
+    C.moveTo 405 50;    C.showText $ M.maybe "" show currentScaleDegree
+    C.moveTo 550 50;    C.showText $ M.maybe "" show currentScale
 
     C.setFontSize 14
     C.moveTo 10 107;    C.showText $ niceList 5 (map show (chordsWithNotes currentNotes))
     C.moveTo 270 107;   C.showText $ niceList 8 (map show $ resolves currentChord)
 
     C.translate 10 130; renderKeyboard (blueAndYellowPressedNotes currentNotes) (250, 180)
-    C.translate 270 0;  renderCOF (blueAndYellowCOF currentNotes currentScale) (250, 250)
+    C.translate 270 0;  renderCOF currentScale (blueAndYellowCOF currentNotes currentScale) (250, 250)
     C.translate 270 0;  renderKeyboard (blueAndYellowScaleNotes (M.maybe [] notes currentScale)) (250, 180)
 
     where niceList n lst = unwords (take n lst)
           currentChord = M.listToMaybe (chordsWithExactNotes currentNotes)
           resolves ch = M.maybe [] (\scale -> M.maybe [] ((flip resolvesChord) scale) ch) currentScale
+          currentScaleDegree = M.maybe Nothing (M.maybe (\x -> Nothing) chordToScaleDegree currentScale) currentChord
