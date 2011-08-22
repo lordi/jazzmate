@@ -2,6 +2,7 @@ module GUI.Render where
 
 import qualified Graphics.Rendering.Cairo as C
 import qualified Data.Maybe as M
+import qualified Data.Char as Char
 import qualified Data.List as L
 
 import Data.Colour.RGBSpace
@@ -76,9 +77,7 @@ renderArc cx cy key currentScale colorfunc = do
 
     C.setFontSize 10
     uncurry (centerShowText (M.maybe "" show majdeg)) $ point (cx + 10) 0
-    uncurry (centerShowText (M.maybe "" show mindeg)) $ point (cx - 90) 0
-
-
+    uncurry (centerShowText (M.maybe "" (map Char.toLower . show) mindeg)) $ point (cx - 93) 0
 
 -- | Render Circle of Fifths
 renderCOF currentScale colorfunc (w, h) = do
@@ -134,7 +133,7 @@ renderCanvas currentScale (currentNotes, historyNotes) = do
     C.setFontSize 20
     C.moveTo 10 50;     C.showText $ niceList 12 (map show currentNotes)
     C.moveTo 270 50;    C.showText $ M.maybe "" show currentChord
-    C.moveTo 405 50;    C.showText $ M.maybe "" show currentScaleDegree
+    C.moveTo 405 50;    C.showText $ M.maybe "" showScaleDegree currentScaleDegree
     C.moveTo 550 50;    C.showText $ M.maybe "" show currentScale
 
     C.setFontSize 14
@@ -149,3 +148,4 @@ renderCanvas currentScale (currentNotes, historyNotes) = do
           currentChord = M.listToMaybe (chordsWithExactNotes currentNotes)
           resolves ch = M.maybe [] (\scale -> M.maybe [] ((flip resolvesChord) scale) ch) currentScale
           currentScaleDegree = M.maybe Nothing (M.maybe (\x -> Nothing) chordToScaleDegree currentScale) currentChord
+          showScaleDegree = (if (M.maybe False isMajorChord currentChord) then id else (map Char.toLower)) . show

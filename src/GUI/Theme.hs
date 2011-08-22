@@ -9,9 +9,6 @@ import Data.Colour.RGBSpace.HSV
 
 import Core
 
-majorChordTypes = [Major, Major7th, Dominant7th]
-minorChordTypes = [Minor, Minor7th]
-
 type Color = RGB Double
 
 yellow = RGB 0.9 0.9 0.2

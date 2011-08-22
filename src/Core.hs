@@ -1,6 +1,7 @@
 module Core (module MusicTheory, blackNotes, chordsWithNotes,
     chordsWithExactNotes, toPitch, fromPitch, noteToCOFAngle,
-    scalesWithNotes, guessScales) where
+    scalesWithNotes, guessScales, majorChordTypes, minorChordTypes,
+    isMajorChord) where
 
 import Data.Maybe
 import qualified Data.List as L
@@ -55,6 +56,11 @@ fromPitch p = toEnum (V.fromPitch p `mod` fromEnum PerfectOctave)
 
 toPitch :: Note -> V.Pitch
 toPitch k = V.toPitch (fromEnum k)
+
+majorChordTypes = [Major, Major7th, Dominant7th]
+minorChordTypes = [Minor, Minor7th]
+
+isMajorChord (Chord _ mode) = mode `elem` majorChordTypes
 
 
 
