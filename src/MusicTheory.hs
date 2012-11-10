@@ -4,7 +4,7 @@ module MusicTheory where
 
 import Data.List
 import Data.Maybe
-import Monad
+import Control.Monad
 import Data.Ord
 
 data Note = C | C' | D | D' | E | F | F' | G | G' | A | A' | B

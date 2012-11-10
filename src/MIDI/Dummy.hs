@@ -12,7 +12,7 @@ import qualified Sound.MIDI.Message as Msg
 import qualified Sound.MIDI.Message.Channel       as ChannelMsg
 import qualified Sound.MIDI.Message.Channel.Voice as VoiceMsg
 
-import Random
+import System.Random
 
 import Core
 

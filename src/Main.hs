@@ -1,6 +1,7 @@
 module Main (main) where
 
-import System
+import System.Exit
+import System.Environment
 import System.Console.GetOpt
 import Data.Maybe( fromMaybe )
 
