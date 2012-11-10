@@ -5,7 +5,7 @@ import Control.Monad.STM
 
 import qualified Sound.MIDI.Message as Msg
 import qualified Sound.MIDI.Message.Channel as Channel
-import Sound.MIDI.Message.Channel (T (Cons), messageBody, Body (Voice))
+import Sound.MIDI.Message.Channel hiding (toPitch, toVelocity)
 import qualified Sound.MIDI.Message.Channel.Voice as V
 
 import qualified Sound.ALSA.Sequencer.Client as Client
@@ -13,7 +13,7 @@ import qualified Sound.ALSA.Sequencer.Port as P
 import qualified Sound.ALSA.Sequencer.Event as E
 import qualified Sound.ALSA.Sequencer as Seq
 import qualified Sound.ALSA.Exception as AlsaExc
-import Sound.MIDI.ALSA
+import Sound.MIDI.ALSA hiding (toChannel)
 import Control.Monad (forever, void, )
 
 -- | Provides a mapping from a Sound.ALSA.Sequencer.Event to a
