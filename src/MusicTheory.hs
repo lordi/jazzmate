@@ -20,6 +20,9 @@ data ChordType =
     | Major7th
     | Minor7th
     | Dominant7th
+    | Major9th
+    | Dominant9th
+    | MinorDominant9th
     deriving (Bounded, Enum, Eq)
 
 data ScaleType =
@@ -57,6 +60,8 @@ data DiatonicInterval =
     | MinorSeventh
     | MajorSeventh
     | PerfectOctave
+    | MinorNinth
+    | MajorNinth
     deriving (Eq, Bounded, Enum, Show)
 
 class NoteSet a where
@@ -81,6 +86,9 @@ cIntervals SuspendedFourth = [PerfectFourth, PerfectFifth]
 cIntervals Major7th = cIntervals Major ++ [MajorSeventh]
 cIntervals Minor7th = cIntervals Minor ++ [MinorSeventh]
 cIntervals Dominant7th = cIntervals Major ++ [MinorSeventh]
+cIntervals Major9th = cIntervals Major7th ++ [MajorNinth]
+cIntervals Dominant9th = cIntervals Dominant7th ++ [MajorNinth]
+cIntervals MinorDominant9th = cIntervals Minor7th ++ [MajorNinth]
 
 sIntervals :: ScaleType -> [DiatonicInterval]
 sIntervals MajorPentatonic =
@@ -205,7 +213,7 @@ tetris = [E, B, C, D, C, B, A, A, C, E]
 
 -- Read/Show
 noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-chordNames =  ["", "m", "sus4", "maj7", "min7", "7"]
+chordNames =  ["", "m", "sus4", "maj7", "min7", "7", "maj9", "9", "min9"]
 
 instance Show Note where
     show n = noteNames!!(fromEnum n)
