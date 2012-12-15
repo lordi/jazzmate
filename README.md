@@ -61,3 +61,9 @@ JACK, you have to use the darcs version at http://code.haskell.org/jack/.
 Then you can configure JazzMate as follows:
 
 > cabal configure -f jack
+
+Links
+-----
+
+ * [Impro-Visor](http://www.cs.hmc.edu/~keller/jazz/improvisor/), Open Source
+   composition software that also helps you jammin'
