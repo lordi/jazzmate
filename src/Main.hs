@@ -91,5 +91,5 @@ main = do
                   let scale = case (k, m) of
                                 (Just key, Just mode) -> Just $ Scale key mode
                                 _                     -> Nothing
-                  GUI.main midi (renderCanvas scale)
+                  GUI.main midi renderCanvas scale
 

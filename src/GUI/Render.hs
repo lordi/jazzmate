@@ -119,7 +119,7 @@ renderKeyboard colorfunc (w, h) = do
 
 
 
-renderCanvas currentScale (currentNotes, historyNotes) = do
+renderCanvas (currentNotes, historyNotes, currentScale) = do
 
     C.setSourceRGBA 0 0 0 1.0
 
