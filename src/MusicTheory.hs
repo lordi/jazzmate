@@ -16,9 +16,13 @@ data ScaleDegree = I | II | III | IV | V | VI | VII
 data ChordType =
       Major
     | Minor
+    | MajorFlat5
+    | MinorFlat5
     | SuspendedFourth
     | Major7th
     | Minor7th
+    | Major7thFlat5
+    | Minor7thFlat5
     | Dominant7th
     | Major9th
     | Dominant9th
@@ -82,9 +86,13 @@ sNotes s = notes s
 cIntervals :: ChordType -> [DiatonicInterval]
 cIntervals Major = [MajorThird, PerfectFifth]
 cIntervals Minor = [MinorThird, PerfectFifth]
+cIntervals MajorFlat5 = [MajorThird, AugmentedFourth]
+cIntervals MinorFlat5 = [MinorThird, AugmentedFourth]
 cIntervals SuspendedFourth = [PerfectFourth, PerfectFifth]
 cIntervals Major7th = cIntervals Major ++ [MajorSeventh]
 cIntervals Minor7th = cIntervals Minor ++ [MinorSeventh]
+cIntervals Major7thFlat5 = cIntervals MajorFlat5 ++ [MajorSeventh]
+cIntervals Minor7thFlat5 = cIntervals MinorFlat5 ++ [MinorSeventh]
 cIntervals Dominant7th = cIntervals Major ++ [MinorSeventh]
 cIntervals Major9th = cIntervals Major7th ++ [MajorNinth]
 cIntervals Dominant9th = cIntervals Dominant7th ++ [MajorNinth]
@@ -92,7 +100,7 @@ cIntervals MinorDominant9th = cIntervals Minor7th ++ [MajorNinth]
 
 sIntervals :: ScaleType -> [DiatonicInterval]
 sIntervals MajorPentatonic =
-	[PerfectUnison, MajorSecond, MajorThird, PerfectFifth, MajorSixth]
+	[MajorSecond, MajorThird]--, PerfectFifth, MajorSixth]
 sIntervals MinorPentatonic =
 	[PerfectUnison, MinorThird, PerfectFourth, PerfectFifth, MinorSeventh]
 sIntervals MajorDiatonic =
@@ -213,7 +221,7 @@ tetris = [E, B, C, D, C, B, A, A, C, E]
 
 -- Read/Show
 noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-chordNames =  ["", "m", "sus4", "maj7", "min7", "7", "maj9", "9", "min9"]
+chordNames =  ["", "m", "b5", "mb5", "sus4", "maj7", "min7", "maj7b5", "min7b5", "7", "maj9", "9", "min9"]
 
 instance Show Note where
     show n = noteNames!!(fromEnum n)
